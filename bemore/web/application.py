@@ -6,6 +6,7 @@ from fastapi.responses import UJSONResponse
 from bemore.logging import configure_logging
 from bemore.web.api.router import api_router
 from bemore.web.lifetime import register_shutdown_event, register_startup_event
+from bemore.core.config import settings
 
 
 def get_app() -> FastAPI:
@@ -20,9 +21,9 @@ def get_app() -> FastAPI:
     app = FastAPI(
         title="bemore",
         version=metadata.version("bemore"),
-        docs_url="/api/docs",
-        redoc_url="/api/redoc",
-        openapi_url="/api/openapi.json",
+        docs_url=f"{settings.API_STR}/docs",
+        redoc_url=f"{settings.API_STR}/redoc",
+        openapi_url=f"{settings.API_STR}/openapi.json",
         default_response_class=UJSONResponse,
     )
 
@@ -31,6 +32,6 @@ def get_app() -> FastAPI:
     register_shutdown_event(app)
 
     # Main router for the API.
-    app.include_router(router=api_router, prefix="/api")
+    app.include_router(router=api_router, prefix=f"{settings.API_STR}")
 
     return app

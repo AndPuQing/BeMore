@@ -1,7 +1,7 @@
 import uvicorn
 
 from bemore.gunicorn_runner import GunicornApplication
-from bemore.settings import settings
+from bemore.core.config import settings
 
 
 def main() -> None:

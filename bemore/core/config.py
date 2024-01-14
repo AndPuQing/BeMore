@@ -1,11 +1,6 @@
 import enum
-from pathlib import Path
-from tempfile import gettempdir
-
+import secrets
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from yarl import URL
-
-TEMP_DIR = Path(gettempdir())
 
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
@@ -27,46 +22,29 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
+    API_STR: str = "/api"
+    SECRET_KEY: str = secrets.token_urlsafe(32)
     host: str = "127.0.0.1"
     port: int = 8000
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
-    reload: bool = True
+    reload: bool = False
 
     # Current environment
     environment: str = "dev"
 
     log_level: LogLevel = LogLevel.INFO
-    # Variables for the database
-    db_host: str = "localhost"
-    db_port: int = 3306
-    db_user: str = "bemore"
-    db_pass: str = "bemore"
-    db_base: str = "bemore"
-    db_echo: bool = False
-
-    @property
-    def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
-
-        :return: database URL.
-        """
-        return URL.build(
-            scheme="mysql",
-            host=self.db_host,
-            port=self.db_port,
-            user=self.db_user,
-            password=self.db_pass,
-            path=f"/{self.db_base}",
-        )
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="BEMORE_",
         env_file_encoding="utf-8",
     )
+
+    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./bemore.db"
+    FIRST_SUPERUSER: str = "admin@localhost"
+    FIRST_SUPERUSER_PASSWORD: str = "admin"
 
 
 settings = Settings()
