@@ -50,11 +50,11 @@ def test_token(current_user: CurrentUser) -> Any:
 
 
 @router.post("/password-recovery/{email}")
-def recover_password(email: str, session: SessionDep) -> Message:
+async def recover_password(email: str, session: SessionDep) -> Message:
     """
     Password Recovery
     """
-    user = crud.get_user_by_email(session=session, email=email)
+    user = crud.get_by_email(db=session, email=email)
 
     if not user:
         raise HTTPException(
@@ -62,7 +62,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
             detail="The user with this username does not exist in the system.",
         )
     password_reset_token = generate_password_reset_token(email=email)
-    send_reset_password_email(
+    await send_reset_password_email(
         email_to=user.email, email=email, token=password_reset_token
     )
     return Message(message="Password recovery email sent")
@@ -76,7 +76,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     email = verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = crud.get_user_by_email(session=session, email=email)
+    user = crud.get_by_email(db=session, email=email)
     if not user:
         raise HTTPException(
             status_code=404,

@@ -3,7 +3,7 @@ from importlib import metadata
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from bemore.logging import configure_logging
+from bemore.log import configure_logging
 from bemore.web.api.router import api_router
 from bemore.web.lifetime import register_shutdown_event, register_startup_event
 from bemore.core.config import settings

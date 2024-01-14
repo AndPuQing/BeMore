@@ -1,4 +1,4 @@
-# import logging
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -30,7 +30,7 @@ def send_email(
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
     response = message.send(to=email_to, render=environment, smtp=smtp_options)
-    # logging.info(f"send email result: {response}")
+    logging.info(f"send email result: {response}")
 
 
 def send_test_email(email_to: str) -> None:
@@ -46,12 +46,12 @@ def send_test_email(email_to: str) -> None:
     )
 
 
-def send_reset_password_email(email_to: str, email: str, token: str) -> None:
+async def send_reset_password_email(email_to: str, email: str, token: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Password recovery for user {email}"
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
         template_str = f.read()
-    server_host = settings.SERVER_HOST
+    server_host = settings.host + ":" + str(settings.port)
     link = f"{server_host}/reset-password?token={token}"
     send_email(
         email_to=email_to,
@@ -72,7 +72,7 @@ def send_new_account_email(email_to: str, username: str, password: str) -> None:
     subject = f"{project_name} - New account for user {username}"
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html") as f:
         template_str = f.read()
-    link = settings.SERVER_HOST
+    link = settings.host + ":" + str(settings.port)
     send_email(
         email_to=email_to,
         subject_template=subject,

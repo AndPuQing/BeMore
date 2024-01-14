@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
+    PROJECT_NAME: str = "BeMore"
     API_STR: str = "/api"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     host: str = "127.0.0.1"
@@ -36,15 +37,30 @@ class Settings(BaseSettings):
 
     log_level: LogLevel = LogLevel.INFO
 
+    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./bemore.db"
+    FIRST_SUPERUSER: str = "admin@localhost.com"
+    FIRST_SUPERUSER_PASSWORD: str = "admin"
+    # 60 minutes * 24 hours * 8 days = 8 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+
+    EMAILS_ENABLED: bool = False
+    EMAILS_FROM_NAME: str = "BeMore"
+    EMAILS_FROM_EMAIL: str = ""
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 0
+    SMTP_TLS: bool = True
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+
+    EMAIL_TEMPLATES_DIR: str = "bemore/email-templates/build"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="BEMORE_",
         env_file_encoding="utf-8",
     )
-
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./bemore.db"
-    FIRST_SUPERUSER: str = "admin@localhost"
-    FIRST_SUPERUSER_PASSWORD: str = "admin"
 
 
 settings = Settings()
