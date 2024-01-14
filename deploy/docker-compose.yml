@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: bemore:${BEMORE_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    labels:
+      # Enables traefik for this container.
+    - traefik.enable=true
+    - traefik.http.routers.bemore.rule=Host(`${BEMORE_TRAEFIK_HOST:-bemore.localhost}`)
+    - traefik.http.routers.bemore.entrypoints=http
+    - traefik.http.routers.bemore.service=bemore
+    - traefik.http.services.bemore.loadbalancer.server.port=${BEMORE_PORT:-8000}
+    networks:
+    - default
+    - traefik-shared
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      BEMORE_HOST: 0.0.0.0
+      BEMORE_DB_HOST: bemore-db
+      BEMORE_DB_PORT: 3306
+      BEMORE_DB_USER: bemore
+      BEMORE_DB_PASS: bemore
+      BEMORE_DB_BASE: bemore
+
+  db:
+    image: bitnami/mysql:8.0.30
+    hostname: bemore-db
+    restart: always
+    environment:
+      MYSQL_ROOT_USER: "bemore"
+      MYSQL_ROOT_PASSWORD: "bemore"
+      MYSQL_DATABASE: "bemore"
+      MYSQL_AUTHENTICATION_PLUGIN: "mysql_native_password"
+    healthcheck:
+      test: mysqladmin ping -h localhost
+      interval: 10s
+      timeout: 5s
+      retries: 40
+    volumes:
+    - bemore-db-data:/bitnami/mysql/data
+
+
+
+volumes:
+  bemore-db-data:
+    name: bemore-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared

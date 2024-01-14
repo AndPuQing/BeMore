@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "bemore"
+version = "0.1.0"
+description = ""
+authors = []
+maintainers = []
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.100.0"
+uvicorn = { version = "^0.22.0", extras = ["standard"] }
+gunicorn = "^21.2.0"
+pydantic = "^2"
+pydantic-settings = "^2"
+yarl = "^1.9.2"
+ujson = "^5.8.0"
+httptools = "^0.6.0"
+loguru = "^0.7.0"
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.1"
+flake8 = "~4.0.1"
+mypy = "^1.1.1"
+isort = "^5.11.4"
+pre-commit = "^3.0.1"
+wemake-python-styleguide = "^0.17.0"
+black = "^22.12.0"
+autoflake = "^1.6.1"
+pytest-cov = "^4.0.0"
+anyio = "^3.6.2"
+pytest-env = "^0.8.1"
+httpx = "^0.23.3"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+src_paths = ["bemore"]
+
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:.*unclosed.*:ResourceWarning",
+]
+env = ["BEMORE_ENVIRONMENT=pytest", "BEMORE_DB_BASE=bemore_test"]
+
+# [fastapi-template.options]
+# project_name = "bemore"
+# api_type = "rest"
+# enable_redis = "None"
+# enable_rmq = "None"
+# ci_type = "github"
+# enable_migrations = "None"
+# enable_taskiq = "None"
+# enable_kube = "None"
+# kube_name = "bemore"
+# enable_routers = "True"
+# enable_kafka = "None"
+# enable_loguru = "True"
+# traefik_labels = "True"
+# add_dummy = "None"
+# orm = "none"
+# self_hosted_swagger = "None"
+# prometheus_enabled = "None"
+# sentry_enabled = "None"
+# otlp_enabled = "None"
+# pydanticv1 = "None"
+# gunicorn = "True"
+# add_users = "None"
+# cookie_auth = "None"
+# jwt_auth = "None"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
