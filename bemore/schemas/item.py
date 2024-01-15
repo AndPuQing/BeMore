@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -6,7 +6,9 @@ from pydantic import BaseModel
 # Shared properties
 class ItemBase(BaseModel):
     title: Optional[str] = None
-    description: Optional[str] = None
+    description: str
+    keywords: Union[list[str], None]
+    raw_url: Optional[str] = None
 
 
 # Properties to receive on item creation
@@ -24,6 +26,7 @@ class ItemInDBBase(ItemBase):
     id: int
     title: str
     owner_id: int
+    is_hidden: bool = False
 
     class Config:
         from_attributes = True

@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
+    USERS_OPEN_REGISTRATION: bool = False
+
     log_level: LogLevel = LogLevel.INFO
 
     SQLALCHEMY_DATABASE_URI: str = "sqlite:///./bemore.db"

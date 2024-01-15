@@ -1,8 +1,8 @@
 # Contents of JWT token
-from typing import Union
+from typing import List, Optional, Union
 
-from pydantic import BaseModel, EmailStr
-from sqlmodel import Field, Relationship, SQLModel, AutoString
+from pydantic import BaseModel, EmailStr, HttpUrl
+from sqlmodel import Field, Relationship, SQLModel, AutoString, JSON, Column
 
 # Shared properties
 class UserBase(SQLModel):
@@ -10,6 +10,31 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: Union[str, None] = None
+    subscription: Union[list[str], None] = Field(default=None, sa_column=Column(JSON))
+
+
+# Properties to receive via API on creation
+class UserCreate(UserBase):
+    password: str
+
+
+class UserCreateOpen(SQLModel):
+    email: EmailStr
+    password: str
+    full_name: Union[str, None] = None
+
+
+# Properties to receive via API on update, all are optional
+class UserUpdate(UserBase):
+    email: Union[EmailStr, None] = None
+    password: Union[str, None] = None
+
+
+class UserUpdateMe(BaseModel):
+    password: Union[str, None] = None
+    full_name: Union[str, None] = None
+    email: Union[EmailStr, None] = None
+    subscription: Union[List[str], None] = None
 
 
 # Database model, database table inferred from class name
@@ -17,11 +42,6 @@ class User(UserBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner")
-
-
-# Properties to receive via API on creation
-class UserCreate(UserBase):
-    password: str
 
 
 # Properties to return via API, id is always required
@@ -32,7 +52,9 @@ class UserOut(UserBase):
 # Shared properties
 class ItemBase(SQLModel):
     title: str
-    description: Union[str, None] = None
+    description: str
+    keywords: Union[list[str], None] = Field(default=None, sa_column=Column(JSON))
+    raw_url: Optional[HttpUrl] = Field(default=None, sa_type=AutoString)
 
 
 # Properties to receive on item creation
@@ -42,17 +64,17 @@ class ItemCreate(ItemBase):
 
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
-    title: Union[str, None] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    keywords: Optional[list[str]] = None
+    raw_url: Optional[HttpUrl] = None
+    is_hidden: Optional[bool] = None
 
 
 # Database model, database table inferred from class name
 class Item(ItemBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
-    title: str
-    owner_id: Union[int, None] = Field(
-        default=None, foreign_key="user.id", nullable=False
-    )
-    owner: Union[User, None] = Relationship(back_populates="items")
+    is_hidden: bool = False
 
 
 # Properties to return via API, id is always required
