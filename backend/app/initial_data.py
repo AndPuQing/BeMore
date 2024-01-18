@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Session
 
-from bemore.db.engine import engine
-from bemore.db.init_db import init_db
+from app.db.engine import engine
+from app.db.init_db import init_db
 
 
 def init() -> None:

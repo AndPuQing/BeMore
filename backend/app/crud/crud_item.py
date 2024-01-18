@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlmodel import col
 
-from bemore.crud.base import CRUDBase
-from bemore.models import Item
-from bemore.schemas.item import ItemCreate, ItemUpdate
+from app.crud.base import CRUDBase
+from app.models import Item
+from app.schemas.item import ItemCreate, ItemUpdate
 
 
 class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):

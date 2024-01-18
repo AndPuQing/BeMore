@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
 
-from bemore.crud.crud_user import user as crud
-from bemore.web.api.deps import CurrentUser, get_current_active_superuser, SessionDep
-from bemore.models import (
+from app.crud.crud_user import user as crud
+from app.web.api.deps import CurrentUser, get_current_active_superuser, SessionDep
+from app.models import (
     User,
     UserCreate,
     UserCreateOpen,
@@ -14,8 +14,8 @@ from bemore.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from bemore.core.config import settings
-from bemore.utils import (
+from app.core.config import settings
+from app.utils import (
     send_new_account_email,
 )
 

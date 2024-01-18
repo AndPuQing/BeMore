@@ -2,10 +2,10 @@ from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
-from bemore.core.security import get_password_hash, verify_password
-from bemore.crud.base import CRUDBase
-from bemore.models import User
-from bemore.schemas.user import UserCreate, UserUpdate
+from app.core.security import get_password_hash, verify_password
+from app.crud.base import CRUDBase
+from app.models import User
+from app.schemas.user import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

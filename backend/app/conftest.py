@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
 
-from bemore.web.application import get_app
+from app.web.application import get_app
 
 
 @pytest.fixture(scope="session")

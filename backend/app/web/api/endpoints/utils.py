@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
-from bemore.web.api.deps import get_current_active_superuser
-from bemore.models import Message
-from bemore.utils import send_test_email
+from app.web.api.deps import get_current_active_superuser
+from app.models import Message
+from app.utils import send_test_email
 
 router = APIRouter()
 

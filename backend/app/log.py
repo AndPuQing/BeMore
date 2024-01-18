@@ -4,7 +4,7 @@ from typing import Union
 
 from loguru import logger
 
-from bemore.core.config import settings
+from app.core.config import settings
 
 
 class InterceptHandler(logging.Handler):

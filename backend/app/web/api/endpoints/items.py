@@ -3,9 +3,9 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
-from bemore.crud.crud_item import item as crud
-from bemore.web.api.deps import CurrentUser, SessionDep
-from bemore.models import Item, ItemCreate, ItemOut, ItemUpdate
+from app.crud.crud_item import item as crud
+from app.web.api.deps import CurrentUser, SessionDep
+from app.models import Item, ItemCreate, ItemOut, ItemUpdate
 
 router = APIRouter()
 

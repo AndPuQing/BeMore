@@ -7,7 +7,7 @@ import emails
 from emails.template import JinjaTemplate
 from jose import jwt
 
-from bemore.core.config import settings
+from app.core.config import settings
 
 
 def send_email(

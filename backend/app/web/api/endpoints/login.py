@@ -4,13 +4,13 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from bemore.crud.crud_user import user as crud
-from bemore.web.api.deps import CurrentUser, SessionDep
-from bemore.core import security
-from bemore.core.config import settings
-from bemore.core.security import get_password_hash
-from bemore.models import Message, NewPassword, Token, UserOut
-from bemore.utils import (
+from app.crud.crud_user import user as crud
+from app.web.api.deps import CurrentUser, SessionDep
+from app.core import security
+from app.core.config import settings
+from app.core.security import get_password_hash
+from app.models import Message, NewPassword, Token, UserOut
+from app.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,

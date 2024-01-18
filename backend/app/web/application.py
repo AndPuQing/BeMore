@@ -3,10 +3,10 @@ from importlib import metadata
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from bemore.log import configure_logging
-from bemore.web.api.router import api_router
-from bemore.web.lifetime import register_shutdown_event, register_startup_event
-from bemore.core.config import settings
+from app.log import configure_logging
+from app.web.api.router import api_router
+from app.web.lifetime import register_shutdown_event, register_startup_event
+from app.core.config import settings
 
 
 def get_app() -> FastAPI:
