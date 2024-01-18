@@ -1,0 +1,59 @@
+[flake8]
+select = E
+
+ignore =
+  # Whitespace before ‘,’, ‘;’, or ‘:’, it is not compatible with black
+    E203,
+    # Module level import not at top of file
+    E402,
+    # Line too long (82 > 79 characters)
+    E501,
+    # Do not compare types, use `isinstance()`
+    E721,
+    # Do not use bare except, specify exception instead
+    E722,
+    # Do not assign a lambda expression, use a def
+    E731,
+    # Do not use variables named ‘l’, ‘O’, or ‘I’
+    E741
+
+per-file-ignores =
+  ; all tests
+  test_*.py,tests.py,tests_*.py,*/tests/*,conftest.py:
+  ; Use of assert detected
+  S101,
+  ; Found outer scope names shadowing
+  WPS442,
+  ; Found too many local variables
+  WPS210,
+  ; Found magic number
+  WPS432,
+  ; Missing parameter(s) in Docstring
+  DAR101,
+  ; Found too many arguments
+  WPS211,
+
+  ; all init files
+  __init__.py:
+  ; ignore not used imports
+  F401,
+  ; ignore import with wildcard
+  F403,
+  ; Found wrong metadata variable
+  WPS410,
+
+exclude =
+  ./.cache,
+  ./.git,
+  ./.idea,
+  ./.mypy_cache,
+  ./.pytest_cache,
+  ./.venv,
+  ./venv,
+  ./env,
+  ./cached_venv,
+  ./docs,
+  ./deploy,
+  ./var,
+  ./.vscode,
+  *migrations*,

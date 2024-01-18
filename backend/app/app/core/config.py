@@ -1,5 +1,6 @@
 import enum
 import secrets
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,8 +26,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "BeMore"
     API_STR: str = "/api"
     SECRET_KEY: str = secrets.token_urlsafe(32)
-    host: str = "127.0.0.1"
-    port: int = 8000
+    host: str = "0.0.0.0"
+    port: int = 8001
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
@@ -60,7 +61,6 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_prefix="BEMORE_",
         env_file_encoding="utf-8",
     )
 

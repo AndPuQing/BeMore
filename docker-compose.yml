@@ -1,6 +1,7 @@
 version: "3.3"
 services:
   db:
+    container_name: bemore-db
     image: postgres:12
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
@@ -8,17 +9,25 @@ services:
       - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
-
-  pgadmin:
-    image: dpage/pgadmin4
     networks:
       - default
+
+  pgadmin:
+    container_name: bemore-pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "8089:5050"
     depends_on:
       - db
     env_file:
       - .env
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    networks:
+      - default
 
   queue:
+    container_name: bemore-queue
     image: rabbitmq:3
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
     # image: rabbitmq:3-management
@@ -26,18 +35,16 @@ services:
     # You also have to change the flower command
 
   flower:
-    image: mher/flower:0.9.7
-    networks:
-      - default
-    env_file:
-      - .env
-    command:
-      - "--broker=amqp://guest@queue:5672//"
-      # For the "Broker" tab to work in the flower UI, uncomment the following command argument,
-      # and change the queue service's image as well
-      # - "--broker_api=http://guest:guest@queue:15672/api//"
+    container_name: bemore-flower
+    image: mher/flower
+    depends_on:
+      - queue
+    command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --port=5555
+    ports:
+      - "5555:5555"
 
   backend:
+    container_name: bemore-backend
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     depends_on:
       - db
@@ -48,6 +55,8 @@ services:
       - SERVER_HOST=https://${DOMAIN?Variable not set}
       # Allow explicit env var override for tests
       - SMTP_HOST=${SMTP_HOST}
+    ports:
+      - "8000:8001"
     build:
       context: ./backend
       dockerfile: backend.dockerfile
@@ -55,6 +64,7 @@ services:
         INSTALL_DEV: ${INSTALL_DEV-false}
 
   celeryworker:
+    container_name: bemore-celeryworker
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
     depends_on:
       - db

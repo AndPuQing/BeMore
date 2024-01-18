@@ -2,7 +2,8 @@
 from typing import List, Optional, Union
 
 from pydantic import BaseModel, EmailStr, HttpUrl
-from sqlmodel import Field, Relationship, SQLModel, AutoString, JSON, Column
+from sqlmodel import JSON, AutoString, Column, Field, SQLModel
+
 
 # Shared properties
 class UserBase(SQLModel):

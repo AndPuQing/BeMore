@@ -1,12 +1,11 @@
-from importlib import metadata
-
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from backend.app.app.log import configure_logging
+import app as appx  # just to get version
+from app.core.config import settings
+from app.log import configure_logging
 from app.web.api.router import api_router
 from app.web.lifetime import register_shutdown_event, register_startup_event
-from app.core.config import settings
 
 
 def get_app() -> FastAPI:
@@ -20,7 +19,7 @@ def get_app() -> FastAPI:
     configure_logging()
     app = FastAPI(
         title="bemore",
-        version=metadata.version("bemore"),
+        version=appx.version,
         docs_url=f"{settings.API_STR}/docs",
         redoc_url=f"{settings.API_STR}/redoc",
         openapi_url=f"{settings.API_STR}/openapi.json",

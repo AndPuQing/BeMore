@@ -4,15 +4,18 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
 from app.crud.crud_item import item as crud
+from app.models import Item, ItemCreate, ItemOut, ItemUpdate
 from app.web.api.deps import CurrentUser, SessionDep
-from backend.app.app.models import Item, ItemCreate, ItemOut, ItemUpdate
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[ItemOut])
 def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[ItemOut]:
     """
     Retrieve items.

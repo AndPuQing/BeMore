@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
 
+from app.core.config import settings
 from app.crud.crud_user import user as crud
-from app.web.api.deps import CurrentUser, get_current_active_superuser, SessionDep
-from backend.app.app.models import (
+from app.models import (
     User,
     UserCreate,
     UserCreateOpen,
@@ -14,10 +14,8 @@ from backend.app.app.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.core.config import settings
-from backend.app.app.utils import (
-    send_new_account_email,
-)
+from app.utils import send_new_account_email
+from app.web.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 
 router = APIRouter()
 
@@ -37,7 +35,9 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> List[Use
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserOut
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserOut,
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> UserOut:
     """
@@ -53,7 +53,9 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> UserOut:
     user = crud.create(db=session, user_create=user_in)
     if settings.EMAILS_ENABLED and user_in.email:
         send_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user_in.email,
+            username=user_in.email,
+            password=user_in.password,
         )
     return user
 
@@ -108,7 +110,9 @@ def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> UserOut:
 
 @router.get("/{user_id}", response_model=UserOut)
 def read_user_by_id(
-    user_id: int, session: SessionDep, current_user: CurrentUser
+    user_id: int,
+    session: SessionDep,
+    current_user: CurrentUser,
 ) -> UserOut:
     """
     Get a specific user by id.

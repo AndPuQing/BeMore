@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlmodel import col
 
 from app.crud.base import CRUDBase
-from backend.app.app.models import Item
+from app.models import Item
 from app.schemas.item import ItemCreate, ItemUpdate
 
 
