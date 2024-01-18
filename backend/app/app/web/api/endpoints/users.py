@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
@@ -15,7 +13,11 @@ from app.models import (
     UserUpdateMe,
 )
 from app.utils import send_new_account_email
-from app.web.api.deps import CurrentUser, SessionDep, get_current_active_superuser
+from app.web.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
+)
 
 router = APIRouter()
 
@@ -23,9 +25,13 @@ router = APIRouter()
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=List[UserOut],
+    response_model=list[UserOut],
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> List[UserOut]:
+def read_users(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[UserOut]:
     """
     Retrieve users.
     """

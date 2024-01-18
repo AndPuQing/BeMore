@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Session
+from sqlmodel import Session, SQLModel
 
 from app.db.engine import engine
 from app.db.init_db import init_db

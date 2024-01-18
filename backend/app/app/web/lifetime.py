@@ -1,4 +1,5 @@
-from typing import Awaitable, Callable
+from collections.abc import Awaitable
+from typing import Callable
 
 from fastapi import FastAPI
 

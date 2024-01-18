@@ -1,7 +1,13 @@
 import logging
 
 from sqlmodel import Session, select
-from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
+from tenacity import (
+    after_log,
+    before_log,
+    retry,
+    stop_after_attempt,
+    wait_fixed,
+)
 
 from app.db.engine import engine
 

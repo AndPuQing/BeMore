@@ -1,5 +1,5 @@
 # Contents of JWT token
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr, HttpUrl
 from sqlmodel import JSON, AutoString, Column, Field, SQLModel
@@ -11,7 +11,10 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: Union[str, None] = None
-    subscription: Union[list[str], None] = Field(default=None, sa_column=Column(JSON))
+    subscription: Union[list[str], None] = Field(
+        default=None,
+        sa_column=Column(JSON),
+    )
 
 
 # Properties to receive via API on creation
@@ -35,7 +38,7 @@ class UserUpdateMe(BaseModel):
     password: Union[str, None] = None
     full_name: Union[str, None] = None
     email: Union[EmailStr, None] = None
-    subscription: Union[List[str], None] = None
+    subscription: Union[list[str], None] = None
 
 
 # Database model, database table inferred from class name
@@ -53,7 +56,10 @@ class UserOut(UserBase):
 class ItemBase(SQLModel):
     title: str
     description: str
-    keywords: Union[list[str], None] = Field(default=None, sa_column=Column(JSON))
+    keywords: Union[list[str], None] = Field(
+        default=None,
+        sa_column=Column(JSON),
+    )
 
 
 # Properties to receive on item creation

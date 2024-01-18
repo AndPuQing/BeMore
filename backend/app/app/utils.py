@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import emails
 from emails.template import JinjaTemplate
@@ -14,9 +14,11 @@ def send_email(
     email_to: str,
     subject_template: str = "",
     html_template: str = "",
-    environment: Dict[str, Any] = {},
+    environment: dict[str, Any] = {},
 ) -> None:
-    assert settings.EMAILS_ENABLED, "no provided configuration for email variables"
+    assert (
+        settings.EMAILS_ENABLED
+    ), "no provided configuration for email variables"
     message = emails.Message(
         subject=JinjaTemplate(subject_template),
         html=JinjaTemplate(html_template),
@@ -46,7 +48,11 @@ def send_test_email(email_to: str) -> None:
     )
 
 
-async def send_reset_password_email(email_to: str, email: str, token: str) -> None:
+async def send_reset_password_email(
+    email_to: str,
+    email: str,
+    token: str,
+) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Password recovery for user {email}"
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
@@ -102,7 +108,11 @@ def generate_password_reset_token(email: str) -> str:
 
 def verify_password_reset_token(token: str) -> Optional[str]:
     try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        decoded_token = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"],
+        )
         return decoded_token["email"]
     except jwt.JWTError:
         return None
