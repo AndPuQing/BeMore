@@ -9,7 +9,7 @@ from jose import jwt
 from app.core import security
 from app.core.config import settings
 from app.db.engine import engine
-from app.models import TokenPayload, User
+from backend.app.app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_STR}/login/access-token"

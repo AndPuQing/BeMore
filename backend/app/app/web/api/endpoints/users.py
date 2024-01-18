@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from app.crud.crud_user import user as crud
 from app.web.api.deps import CurrentUser, get_current_active_superuser, SessionDep
-from app.models import (
+from backend.app.app.models import (
     User,
     UserCreate,
     UserCreateOpen,
@@ -15,7 +15,7 @@ from app.models import (
     UserUpdateMe,
 )
 from app.core.config import settings
-from app.utils import (
+from backend.app.app.utils import (
     send_new_account_email,
 )
 

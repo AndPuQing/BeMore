@@ -1,6 +1,6 @@
 import uvicorn
 
-from app.gunicorn_runner import GunicornApplication
+from backend.app.app.gunicorn_runner import GunicornApplication
 from app.core.config import settings
 
 

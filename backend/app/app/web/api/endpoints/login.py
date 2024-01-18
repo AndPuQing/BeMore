@@ -9,8 +9,8 @@ from app.web.api.deps import CurrentUser, SessionDep
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.models import Message, NewPassword, Token, UserOut
-from app.utils import (
+from backend.app.app.models import Message, NewPassword, Token, UserOut
+from backend.app.app.utils import (
     generate_password_reset_token,
     send_reset_password_email,
     verify_password_reset_token,

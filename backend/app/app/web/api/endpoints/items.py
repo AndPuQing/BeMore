@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from app.crud.crud_item import item as crud
 from app.web.api.deps import CurrentUser, SessionDep
-from app.models import Item, ItemCreate, ItemOut, ItemUpdate
+from backend.app.app.models import Item, ItemCreate, ItemOut, ItemUpdate
 
 router = APIRouter()
 
