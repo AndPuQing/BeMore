@@ -2,13 +2,15 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v4.4.0
     hooks:
-      - id: check-ast
-      - id: trailing-whitespace
-      - id: check-toml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: detect-private-key
       - id: end-of-file-fixer
-
+      - id: trailing-whitespace
+        files: (.*\.(py|md|yaml|yml|hook)|BUILD|.*\.BUILD|WORKSPACE)$
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.1.0
     hooks:
@@ -16,22 +18,14 @@ repos:
 
   - repo: local
     hooks:
-      - id: autoflake
-        name: autoflake
-        entry: poetry run -C backend/app -- autoflake
-        language: system
-        types: [python]
-        args: [--in-place, --remove-all-unused-imports, --remove-duplicate-keys]
-
       - id: black
         name: Format with Black
         entry: poetry run -C backend/app -- black
         language: system
         types: [python]
-
-      - id: isort
-        name: isort
-        entry: poetry run -C backend/app -- isort
+      - id: autoflake
+        name: autoflake
+        entry: poetry run -C backend/app -- autoflake
         language: system
         types: [python]
 
@@ -42,3 +36,10 @@ repos:
         pass_filenames: false
         types: [python]
         args: [--count, .]
+
+      - id: ruff
+        name: Format with Ruff
+        entry: poetry run -C backend/app -- ruff
+        language: system
+        types: [python]
+        args: [--fix, --exit-non-zero-on-fix, --no-cache]
