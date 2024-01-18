@@ -41,7 +41,6 @@ class UserUpdateMe(BaseModel):
 class User(UserBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner")
 
 
 # Properties to return via API, id is always required
@@ -54,12 +53,12 @@ class ItemBase(SQLModel):
     title: str
     description: str
     keywords: Union[list[str], None] = Field(default=None, sa_column=Column(JSON))
-    raw_url: Optional[HttpUrl] = Field(default=None, sa_type=AutoString)
 
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
     title: str
+    raw_url: Optional[HttpUrl] = None
 
 
 # Properties to receive on item update
@@ -75,6 +74,7 @@ class ItemUpdate(ItemBase):
 class Item(ItemBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
     is_hidden: bool = False
+    raw_url: Optional[str]
 
 
 # Properties to return via API, id is always required

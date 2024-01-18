@@ -12,7 +12,7 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
             title=obj_in.title,
             description=obj_in.description,
             keywords=obj_in.keywords,
-            raw_url=obj_in.raw_url,
+            raw_url=str(obj_in.raw_url),
         )
         db.add(db_obj)
         db.commit()
