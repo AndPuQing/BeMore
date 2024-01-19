@@ -40,7 +40,11 @@ class Settings(BaseSettings):
 
     log_level: LogLevel = LogLevel.INFO
 
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./bemore.db"
+    # postgres settings
+    POSTGRES_USER = "bemore"
+    POSTGRES_PASSWORD = "changethis"
+    POSTGRES_DB = "app"
+    SQLALCHEMY_DATABASE_URI: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@bemore-db/{POSTGRES_DB}"
     FIRST_SUPERUSER: str = "admin@localhost.com"
     FIRST_SUPERUSER_PASSWORD: str = "admin"
     # 60 minutes * 24 hours * 8 days = 8 days
