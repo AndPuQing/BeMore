@@ -1,4 +1,6 @@
+from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
 from app.models import Message
@@ -7,6 +9,12 @@ from app.web.api.deps import get_current_active_superuser
 from app.worker import test_celery_worker
 
 router = APIRouter()
+
+
+class TaskOut(BaseModel):
+    task_id: str
+    status: str | None = None
+    result: str | None = None
 
 
 @router.post(
@@ -27,8 +35,16 @@ def test_email(email_to: EmailStr) -> Message:
     dependencies=[Depends(get_current_active_superuser)],
     status_code=201,
 )
-def test_celery(word: str) -> None:
+def test_celery(word: str) -> TaskOut:
     """
     Test celery.
     """
-    return test_celery_worker.delay(word)
+    task = test_celery_worker.delay(word)
+    return _to_task_out(task)
+
+
+def _to_task_out(r: AsyncResult) -> TaskOut:
+    return TaskOut(
+        task_id=r.task_id,  # type: ignore
+        status=r.status,
+    )

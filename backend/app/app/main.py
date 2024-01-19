@@ -2,6 +2,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.gunicorn_runner import GunicornApplication
+from app.initial_data import init
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
 
     This function is used to start the application.
     """
-
+    init()
     if settings.reload:
         uvicorn.run(
             "app.web.application:get_app",

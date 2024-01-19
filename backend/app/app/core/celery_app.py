@@ -1,5 +1,10 @@
 from celery import Celery
 
-celery_app = Celery("worker", broker="amqp://guest@bemore-queue//")
+from app.core.config import settings
 
-celery_app.conf.task_routes = {"app.worker.test_celery": "main-queue"}
+celery_app = Celery(
+    "worker",
+    broker="amqp://guest@bemore-queue//",
+    backend="db+"
+    + f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@bemore-db/{settings.POSTGRES_DB}",
+)
