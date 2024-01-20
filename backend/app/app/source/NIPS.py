@@ -4,12 +4,11 @@ from app.source.base import PaperRequestsTask
 
 
 class Nips(PaperRequestsTask):
-    def __init__(self):
-        url: str = "https://nips.cc/Conferences/2023/Schedule?type=Poster"
-        super().__init__(url)
+    url: str = "https://nips.cc/Conferences/2023/Schedule?type=Poster"
+    name: str = "Nips"
 
     @staticmethod
-    def get_urls(response: HtmlResponse) -> list[str]:
+    def parse_urls(response: HtmlResponse) -> list[str]:
         poster_ids = response.css(".maincard::attr(id)").getall()
         urls = [
             f"https://nips.cc/Conferences/2023/Schedule?showEvent={poster_id.replace('maincard_', '')}"

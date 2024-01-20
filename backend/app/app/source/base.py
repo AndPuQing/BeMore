@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod
 
 import requests
 from celery import Task
@@ -7,23 +6,27 @@ from scrapy.http import HtmlResponse
 
 
 class PaperRequestsTask(Task):
-    def __init__(self, url):
-        self.url = url
+    url: str
 
-    @abstractmethod
     @staticmethod
-    def get_urls(response: HtmlResponse) -> list[str]:
+    def parse_urls(response: HtmlResponse) -> list[str]:
         # you should return list of absolute urls
         raise NotImplementedError
 
+    @classmethod
+    def get_urls(cls) -> list[str]:
+        response = cls.requestx(cls.url)
+        if response is None:
+            return []
+        return cls.parse_urls(response)
+
     @staticmethod
-    @abstractmethod
     def parse(response: HtmlResponse) -> dict[str, str]:
         # you should return dict with fields:
         raise NotImplementedError
 
     @staticmethod
-    def request(url: str) -> HtmlResponse | None:
+    def requestx(url: str) -> HtmlResponse | None:
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -35,7 +38,7 @@ class PaperRequestsTask(Task):
     def run(self, urls: list[str]):
         results = []
         for url in urls:
-            response = PaperRequestsTask.request(url)
+            response = PaperRequestsTask.requestx(url)
             if response is None:
                 continue
             results.append(self.parse(response))
