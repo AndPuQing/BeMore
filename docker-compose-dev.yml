@@ -28,7 +28,7 @@ services:
 
   queue:
     container_name: bemore-queue
-    image: rabbitmq:3
+    image: rabbitmq:3-management
     # Using the below image instead is required to enable the "Broker" tab in the flower UI:
     # image: rabbitmq:3-management
     #
@@ -39,7 +39,7 @@ services:
     image: mher/flower
     depends_on:
       - queue
-    command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --port=5555
+    command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --broker_api=http://guest:guest@bemore-queue:15672/api/
     ports:
       - "5555:5555"
 

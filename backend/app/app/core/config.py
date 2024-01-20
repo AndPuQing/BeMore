@@ -63,6 +63,9 @@ class Settings(BaseSettings):
 
     EMAIL_TEMPLATES_DIR: str = "bemore/email-templates/build"
 
+    # requests settings
+    REQUESTS_BATCH_SIZE: int = 10
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
