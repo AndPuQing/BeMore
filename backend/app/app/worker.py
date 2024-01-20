@@ -1,9 +1,13 @@
+import logging
+
 from app.core.celery_app import celery_app
-from app.source.NIPS import Nips
+
+
+def run_paper_requests_task(source: str):
+    pass
 
 
 @celery_app.task(acks_late=True)
 def test_celery_worker(word: str) -> None:
-    print(f"word: {word}")
-    Nips("https://nips.cc/Conferences/2023/Schedule?type=Poster").run()
-    print("done")
+    logging.info("Celery worker is working")
+    logging.info(f"DONE: {word}")

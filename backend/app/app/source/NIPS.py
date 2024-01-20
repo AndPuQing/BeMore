@@ -1,16 +1,25 @@
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequests
+from app.source.base import PaperRequestsTask
 
 
-class Nips(PaperRequests):
+class Nips(PaperRequestsTask):
+    def __init__(self):
+        url: str = "https://nips.cc/Conferences/2023/Schedule?type=Poster"
+        super().__init__(url)
+
     @staticmethod
-    def get_urls(response: HtmlResponse):
-        return response.css("div::attr(onclick)").getall()
+    def get_urls(response: HtmlResponse) -> list[str]:
+        poster_ids = response.css(".maincard::attr(id)").getall()
+        urls = [
+            f"https://nips.cc/Conferences/2023/Schedule?showEvent={poster_id.replace('maincard_', '')}"
+            for poster_id in poster_ids
+        ]
+        return urls
 
     @staticmethod
     def parse(response: HtmlResponse):
-        yield {
+        return {
             "type": response.css("div.maincardType::text").get(),
             "title": response.css("div.maincardBody::text").get(),
             "authors": response.css("div.maincardFooter::text").get(),

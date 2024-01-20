@@ -2,23 +2,24 @@ import logging
 from abc import abstractmethod
 
 import requests
+from celery import Task
 from scrapy.http import HtmlResponse
 
-from app.core.celery_app import celery_app
-from app.core.config import settings
 
-
-class PaperRequests:
+class PaperRequestsTask(Task):
     def __init__(self, url):
         self.url = url
 
     @abstractmethod
-    def get_urls(self, response: HtmlResponse) -> list:
+    @staticmethod
+    def get_urls(response: HtmlResponse) -> list[str]:
+        # you should return list of absolute urls
         raise NotImplementedError
 
+    @staticmethod
     @abstractmethod
-    @celery_app.task(acks_late=True)
-    def parse(self, response: HtmlResponse) -> None:
+    def parse(response: HtmlResponse) -> dict[str, str]:
+        # you should return dict with fields:
         raise NotImplementedError
 
     @staticmethod
@@ -31,16 +32,11 @@ class PaperRequests:
             return
         return HtmlResponse(url=url, body=response.content, encoding="utf-8")
 
-    @staticmethod
-    def batch_urls(urls: list, batch_size: int = settings.REQUESTS_BATCH_SIZE):
-        for i in range(0, len(urls), batch_size):
-            yield urls[i : i + batch_size]
-
-    def run(self):
-        self.response = self.request(self.url)
-        if self.response is None:
-            return
-        urls = self.get_urls(self.response)
-        logging.info(f"From {self.url} found {len(urls)} urls")
-        for batch in self.batch_urls(urls):
-            self.parse.delay(batch)
+    def run(self, urls: list[str]):
+        results = []
+        for url in urls:
+            response = PaperRequestsTask.request(url)
+            if response is None:
+                continue
+            results.append(self.parse(response))
+        return results
