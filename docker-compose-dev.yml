@@ -25,7 +25,6 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     networks:
       - default
-
   queue:
     container_name: bemore-queue
     image: rabbitmq:3-management
@@ -33,6 +32,8 @@ services:
     # image: rabbitmq:3-management
     #
     # You also have to change the flower command
+    ports:
+      - "15672:15672"
 
   flower:
     container_name: bemore-flower

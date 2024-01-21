@@ -1,4 +1,5 @@
 # Contents of JWT token
+from datetime import datetime
 from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr, HttpUrl
@@ -55,7 +56,7 @@ class UserOut(UserBase):
 # Shared properties
 class ItemBase(SQLModel):
     title: str
-    description: str
+    abstract: str
     keywords: Union[list[str], None] = Field(
         default=None,
         sa_column=Column(JSON),
@@ -71,7 +72,7 @@ class ItemCreate(ItemBase):
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
     title: Optional[str] = None
-    description: Optional[str] = None
+    abstract: Optional[str] = None
     keywords: Optional[list[str]] = None
     raw_url: Optional[HttpUrl] = None
     is_hidden: Optional[bool] = None
@@ -87,6 +88,15 @@ class Item(ItemBase, table=True):
 # Properties to return via API, id is always required
 class ItemOut(ItemBase):
     id: int
+
+
+class CrawledItem(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    raw_url: str = Field(nullable=False)
+    last_crawled: datetime = Field(
+        default_factory=datetime.utcnow,
+        nullable=False,
+    )
 
 
 class TokenPayload(BaseModel):
