@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 from gunicorn.app.base import BaseApplication
 from gunicorn.util import import_app
@@ -44,7 +44,7 @@ class GunicornApplication(BaseApplication):
         workers: int,
         **kwargs: Any,
     ):
-        self.options = {
+        self.options: dict[str, Union[int, str]] = {
             "bind": f"{host}:{port}",
             "workers": workers,
             "worker_class": "app.gunicorn_runner.UvicornWorker",
@@ -63,8 +63,8 @@ class GunicornApplication(BaseApplication):
         parameter to it, it crash with error.
         """
         for key, value in self.options.items():
-            if key in self.cfg.settings and value is not None:
-                self.cfg.set(key.lower(), value)
+            if key in self.cfg.settings and value is not None:  # type: ignore
+                self.cfg.set(key.lower(), value)  # type: ignore
 
     def load(self) -> str:
         """
