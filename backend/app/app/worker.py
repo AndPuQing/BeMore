@@ -7,9 +7,9 @@ from sqlmodel import Session, select
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.models import CrawledItem
-from app.source import Nips
+from app.source import NIPS
 
-celery_app.register_task(Nips())
+celery_app.register_task(NIPS())
 
 
 def batch(iterable: Union[set[str], list[str]], n: int = 1):
@@ -43,7 +43,7 @@ class DatabaseTask(Task):
     ignore_result=True,
 )
 def test_celery_worker(self: DatabaseTask, word: str) -> None:
-    urls = set(Nips.get_urls())
+    urls = set(NIPS.get_urls())
 
     # remove duplicates from db
     with self.db as db:
@@ -57,4 +57,4 @@ def test_celery_worker(self: DatabaseTask, word: str) -> None:
     logging.info(f"Cache hit rate: {cache_hit_rate * 100:.2f}%")
 
     for url in batch(urls, settings.REQUESTS_BATCH_SIZE):
-        celery_app.send_task("Nips", kwargs={"urls": url})
+        celery_app.send_task("NIPS", kwargs={"urls": url})

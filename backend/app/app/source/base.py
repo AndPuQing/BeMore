@@ -1,12 +1,21 @@
 import logging
 from typing import Any
 
+import feedparser
 import requests
 from celery import Task
+from feedparser import FeedParserDict
 from scrapy.http import HtmlResponse
 from sqlmodel import Session
 
 from app.models import CrawledItem, Item
+
+
+def openreview_url(urls):
+    for url in urls[::-1]:
+        if "openreview" in url:
+            return url
+    return urls[0]  # if no openreview url, return the first url
 
 
 class PaperRequestsTask(Task):
@@ -91,3 +100,38 @@ class PaperRequestsTask(Task):
             results.append((url, item))
 
         self.save(results)
+
+
+class RSSTask(Task):
+    name: str
+    url: str
+    ignore_result: bool = True
+
+    @property
+    def db(self):
+        """
+        Lazy loading of database connection.
+        """
+        from app.db.engine import engine
+
+        return Session(engine)
+
+    @staticmethod
+    def parse(entry) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def post_parse(self, entry: dict[str, Any]) -> dict[str, Any]:
+        return entry
+
+    def run(self):
+        feed: FeedParserDict = feedparser.parse(self.url)
+        results = []
+        for entry in feed.entries:
+            item = self.parse(entry)
+            item = self.post_parse(item)
+
+            if item["title"] is None or item["abstract"] is None:
+                logging.warning(f"Empty title or abstract: {entry.link}")
+                continue
+
+            results.append((entry.link, item))

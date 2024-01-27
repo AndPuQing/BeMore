@@ -2,12 +2,12 @@ from typing import Any
 
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequestsTask
+from app.source.base import PaperRequestsTask, openreview_url
 
 
-class Nips(PaperRequestsTask):
+class NIPS(PaperRequestsTask):
     url: str = "https://nips.cc/Conferences/2023/Schedule?type=Poster"
-    name: str = "Nips"
+    name: str = "NIPS"
 
     @staticmethod
     def parse_urls(response: HtmlResponse) -> list[str]:
@@ -41,10 +41,3 @@ class Nips(PaperRequestsTask):
             for i, author in enumerate(item["authors"]):
                 item["authors"][i] = author.strip()
         return item
-
-
-def openreview_url(urls):
-    for url in urls[::-1]:
-        if "openreview" in url:
-            return url
-    return urls[0]  # if no openreview url, return the first url

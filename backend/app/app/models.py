@@ -88,6 +88,10 @@ class Item(ItemBase, table=True):
         sa_column=Column(JSON),
     )
     from_source: str = Field(nullable=False)
+    category: Union[list[str], None] = Field(
+        default=None,
+        sa_column=Column(JSON),
+    )
 
 
 # Properties to return via API, id is always required
