@@ -55,8 +55,8 @@ class UserOut(UserBase):
 
 # Shared properties
 class ItemBase(SQLModel):
-    title: str
-    abstract: str
+    title: str = Field(nullable=False)
+    abstract: str = Field(nullable=False)
     keywords: Union[list[str], None] = Field(
         default=None,
         sa_column=Column(JSON),
@@ -66,7 +66,7 @@ class ItemBase(SQLModel):
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
     title: str
-    raw_url: Optional[HttpUrl] = None
+    url: Optional[HttpUrl] = None
 
 
 # Properties to receive on item update
@@ -74,7 +74,7 @@ class ItemUpdate(ItemBase):
     title: Optional[str] = None
     abstract: Optional[str] = None
     keywords: Optional[list[str]] = None
-    raw_url: Optional[HttpUrl] = None
+    url: Optional[HttpUrl] = None
     is_hidden: Optional[bool] = None
 
 
@@ -82,7 +82,12 @@ class ItemUpdate(ItemBase):
 class Item(ItemBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
     is_hidden: bool = False
-    raw_url: Optional[str]
+    url: Optional[str]
+    authors: Union[list[str], None] = Field(
+        default=None,
+        sa_column=Column(JSON),
+    )
+    from_source: str = Field(nullable=False)
 
 
 # Properties to return via API, id is always required

@@ -12,19 +12,6 @@ services:
     networks:
       - default
 
-  pgadmin:
-    container_name: bemore-pgadmin
-    image: dpage/pgadmin4
-    ports:
-      - "8089:5050"
-    depends_on:
-      - db
-    env_file:
-      - .env
-    environment:
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    networks:
-      - default
 
   queue:
     container_name: bemore-queue
@@ -34,14 +21,7 @@ services:
     #
     # You also have to change the flower command
 
-  flower:
-    container_name: bemore-flower
-    image: mher/flower
-    depends_on:
-      - queue
-    command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --port=5555
-    ports:
-      - "5555:5555"
+
 
   backend:
     container_name: bemore-backend

@@ -1,3 +1,5 @@
+from typing import Any
+
 from scrapy.http import HtmlResponse
 
 from app.source.base import PaperRequestsTask
@@ -18,15 +20,26 @@ class Nips(PaperRequestsTask):
 
     @staticmethod
     def parse(response: HtmlResponse):
-        return {
-            "type": response.css("div.maincardType::text").get(),
+        item = {
             "title": response.css("div.maincardBody::text").get(),
             "authors": response.css("div.maincardFooter::text").get(),
             "url": openreview_url(
                 response.css("div.maincard span a::attr(href)").getall(),
             ),
-            "abstract": response.css("div.abstractContainer::text").get(),
+            "abstract": response.css("div.abstractContainer p::text").get(),
         }
+        if item["abstract"] is None:
+            item["abstract"] = response.css("div.abstractContainer::text").get()
+
+        return item
+
+    @staticmethod
+    def post_parse(item: dict[str, Any]) -> dict[str, Any]:
+        if item["authors"] is not None:
+            item["authors"] = item["authors"].split(" · ")
+        for i, author in enumerate(item["authors"]):
+            item["authors"][i] = author.strip()
+        return item
 
 
 def openreview_url(urls):

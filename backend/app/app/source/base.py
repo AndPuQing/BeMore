@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import requests
 from celery import Task
@@ -11,6 +12,7 @@ from app.models import CrawledItem, Item
 class PaperRequestsTask(Task):
     url: str
     ignore_result: bool = True
+    name: str
 
     @property
     def db(self):
@@ -51,27 +53,27 @@ class PaperRequestsTask(Task):
             return
         return HtmlResponse(url=url, body=response.content, encoding="utf-8")
 
-    def save(self, data: list[dict[str, str]]) -> None:
+    def save(self, data: list[tuple[str, dict[str, Any]]]) -> None:
         with self.db as db:
+            objs = [CrawledItem(raw_url=item[0]) for item in data]
+            db.add_all(objs)
+            db.commit()
+
+            # TODO: add relations between CrawledItem and Item
             objs = [
-                CrawledItem(
-                    raw_url=item["url"],
+                Item(
+                    **item[1],
+                    from_source=self.name,
                 )
                 for item in data
             ]
             db.add_all(objs)
             db.commit()
 
-            objs = [
-                Item(
-                    title=item["title"],
-                    abstract=item["abstract"],
-                    raw_url=item["url"],
-                )
-                for item in data
-            ]
-            db.add_all(objs)
-            db.commit()
+    @staticmethod
+    def post_parse(data: dict[str, Any]) -> dict[str, Any]:
+        # you can do some post processing here
+        return data
 
     def run(self, urls: list[str]):
         results = []
@@ -79,5 +81,13 @@ class PaperRequestsTask(Task):
             response = PaperRequestsTask._request(url)
             if response is None:
                 continue
-            results.append(self.parse(response))
+            item = self.parse(response)
+            item = self.post_parse(item)
+
+            if item["title"] is None or item["abstract"] is None:
+                logging.warning(f"Empty title or abstract: {url}")
+                continue
+
+            results.append((url, item))
+
         self.save(results)
