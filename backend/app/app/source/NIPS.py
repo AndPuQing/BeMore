@@ -37,8 +37,9 @@ class Nips(PaperRequestsTask):
     def post_parse(item: dict[str, Any]) -> dict[str, Any]:
         if item["authors"] is not None:
             item["authors"] = item["authors"].split(" · ")
-        for i, author in enumerate(item["authors"]):
-            item["authors"][i] = author.strip()
+        if item["authors"] is not None:
+            for i, author in enumerate(item["authors"]):
+                item["authors"][i] = author.strip()
         return item
 
 
