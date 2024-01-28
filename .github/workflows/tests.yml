@@ -13,6 +13,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         flags: unittests
-        directory: backend/app
+        directory: ./backend/app/
         fail_ci_if_error: true
         verbose: true
