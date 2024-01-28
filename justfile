@@ -20,4 +20,4 @@ dev-logs:
   docker-compose -f docker-compose.dev.yml logs -f
 
 test: dev-run
-  docker-compose -f docker-compose.dev.yml exec backend poetry run pytest --cov=app --cov-report=term-missing app/tests
+  docker-compose -f docker-compose.dev.yml exec backend poetry run pytest --cov=app --cov-report=term-missing --cov-report=html app/tests

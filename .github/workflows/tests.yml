@@ -1,6 +1,6 @@
 name: Testing bemore
 
-on: push
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   black:
@@ -31,3 +31,17 @@ jobs:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run flake8 check
       run: poetry run flake8 --count .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - run: sudo snap install --edge --classic just
+    - uses: actions/checkout@v4
+    - run: just test
+    - uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        directory: backend/app
+        fail_ci_if_error: true
+        verbose: true
