@@ -18,7 +18,7 @@ class TaskOut(BaseModel):
 
 
 @router.post(
-    "/test-email/",
+    "/test-email",
     dependencies=[Depends(get_current_active_superuser)],
     status_code=201,
 )
@@ -30,8 +30,16 @@ def test_email(email_to: EmailStr) -> Message:
     return Message(message="Test email sent")
 
 
+@router.get("/health_check", status_code=200)
+def health_check() -> Message:
+    """
+    Check health.
+    """
+    return Message(message="OK")
+
+
 @router.post(
-    "/texst-celery/",
+    "/texst-celery",
     dependencies=[Depends(get_current_active_superuser)],
     status_code=201,
 )
