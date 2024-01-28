@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
+from starlette import status
 
 from app.core.config import settings
 from app.models import (
@@ -26,6 +27,7 @@ router = APIRouter()
     "/",
     dependencies=[Depends(get_current_active_superuser)],
     response_model=list[UserOut],
+    status_code=status.HTTP_200_OK,
 )
 def read_users(
     session: SessionDep,
@@ -44,6 +46,7 @@ def read_users(
     "/",
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UserOut,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
