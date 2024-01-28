@@ -2,6 +2,16 @@
 
 Bemore is a web application that helps you to keep up with the latest research in your field.
 
+<p align="center">
+<a href="https://github.com/AndPuQing/BeMore/actions/workflows/tests.yml"><img alt="CI Status" src="https://github.com/AndPuQing/BeMore/actions/workflows/tests.yml/badge.svg?branch=develop"></a>
+<a href="https://codecov.io/gh/AndPuQing/BeMore" >
+ <img src="https://codecov.io/gh/AndPuQing/BeMore/graph/badge.svg?token=45JXQFBEJY"/>
+ </a>
+<a href="https://github.com/AndPuQing/BeMore/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
+
+
 ## Structure
 
 ![Structure](./assets/arch.png)

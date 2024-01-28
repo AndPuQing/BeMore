@@ -1,4 +1,8 @@
 codecov:
   disable_default_path_fixes: true
 fixes:
-- ::backend/app/app     # reduce root e.g., "before/path/" => "path/"
+- ::backend/app/app
+
+comment:
+  layout: diff,flags,tree,betaprofiling
+  show_critical_paths: true
