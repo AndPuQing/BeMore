@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
-from sqlmodel import col
+from typing import Optional
+
+from sqlmodel import Session, col
 
 from app.crud.base import CRUDBase
 from app.models import Item
@@ -30,13 +31,15 @@ class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
             db_obj.raw_url = obj_in.raw_url
         return super().update(db, db_obj=db_obj, obj_in=obj_in)
 
-    def get_by_id(self, db: Session, *, id: int) -> Item:
-        return db.query(Item).filter(Item.id == id).first()
+    def get_by_id(self, db: Session, *, id: int) -> Optional[Item]:
+        return db.get(Item, id)
 
     def get_by_fuzzy_title(self, db: Session, *, title: str) -> list[Item]:
         return db.query(Item).filter(col("title").ilike(f"%{title}%")).all()
 
-    def create_bulk(self, db: Session, *, objs_in: list[ItemCreate]) -> list[Item]:
+    def create_bulk(
+        self, db: Session, *, objs_in: list[ItemCreate]
+    ) -> list[Item]:
         objs = [Item(**obj_in.model_dump()) for obj_in in objs_in]
         db.add_all(objs)
         db.commit()

@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
@@ -10,7 +10,8 @@ from app.schemas.user import UserCreate, UserUpdate
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
-        return db.query(User).filter(User.email == email).first()
+        statement = select(User).where(User.email == email)
+        return db.exec(statement).first()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
