@@ -13,15 +13,12 @@ router = APIRouter()
 @router.get("/", response_model=list[ItemOut])
 def read_items(
     session: SessionDep,
-    current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
-) -> list[ItemOut]:
+) -> Any:
     """
     Retrieve items.
     """
-    if current_user.is_superuser:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
     statement = select(Item).offset(skip).limit(limit)
     return session.exec(statement).all()
 
@@ -66,7 +63,11 @@ def create_items(*, session: SessionDep, items_in: list[ItemCreate]) -> Any:
 
 @router.put("/{id}", response_model=ItemOut)
 def update_item(
-    *, session: SessionDep, current_user: CurrentUser, id: int, item_in: ItemUpdate
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: int,
+    item_in: ItemUpdate
 ) -> Any:
     """
     Update an item.
@@ -81,7 +82,11 @@ def update_item(
 
 
 @router.delete("/{id}", response_model=ItemOut)
-def delete_item(session: SessionDep, current_user: CurrentUser, id: int) -> ItemOut:
+def delete_item(
+    session: SessionDep,
+    current_user: CurrentUser,
+    id: int,
+) -> ItemOut:
     """
     Delete an item.
     """

@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
@@ -31,7 +33,7 @@ def read_users(
     session: SessionDep,
     skip: int = 0,
     limit: int = 100,
-) -> list[UserOut]:
+) -> Any:
     """
     Retrieve users.
     """
