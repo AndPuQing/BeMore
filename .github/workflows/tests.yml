@@ -17,6 +17,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         flags: unittests
-        root_dir: ./backend/app
+        root_dir: ./backend/app/
         fail_ci_if_error: false
         verbose: true
