@@ -13,7 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: sudo snap install --edge --classic just
-    - uses: actions/checkout@v4
+    - name: Checkout
+      if: github.event_name != 'pull_request'
+      uses: actions/checkout@v4
+    - name: Checkout
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
     - name: Cache Docker images.
       uses: ScribeMD/docker-cache@0.3.7
       with:
