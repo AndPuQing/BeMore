@@ -1,13 +1,16 @@
+import inspect
 from typing import Union
 
 from celery import Task
 from sqlmodel import Session
 
+from app import source
 from app.core.celery_app import celery_app
-from app.source import NIPS, Arxiv
 
-celery_app.register_task(NIPS())
-celery_app.register_task(Arxiv())
+members = inspect.getmembers(source, inspect.isclass)
+for name, _class in members:
+    # auto register task
+    celery_app.register_task(_class)
 
 
 def batch(iterable: Union[set[str], list[str]], n: int = 1):

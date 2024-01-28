@@ -1,4 +1,4 @@
-from app.source import NIPS
+from app.source.NIPS import NIPS
 
 
 class ICML(NIPS):
