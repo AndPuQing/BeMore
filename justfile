@@ -21,4 +21,4 @@ dev-logs:
 
 test:
   docker-compose -f docker-compose.ci.yml up -d --build
-  docker-compose exec -T backend poetry run pytest --cov=app --cov-report=xml
+  docker-compose exec -T backend poetry run pytest --cov-report=xml
