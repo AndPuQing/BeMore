@@ -3,6 +3,8 @@ from typing import Callable
 
 from fastapi import FastAPI
 
+from app.db.init_db import init
+
 
 def register_startup_event(
     app: FastAPI,
@@ -21,6 +23,7 @@ def register_startup_event(
     async def _startup() -> None:  # noqa: WPS430
         app.middleware_stack = None
         app.middleware_stack = app.build_middleware_stack()
+        init()
         pass  # noqa: WPS420
 
     return _startup

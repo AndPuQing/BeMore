@@ -1,18 +1,11 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, SQLModel, select
 
 from app.core.config import settings
+from app.db.engine import engine
 from app.models import User, UserCreate  # noqa: F401
-
-# make sure all SQLModel models are imported (app.models) before initializing DB
-# otherwise, SQLModel might fail to initialize relationships properly
-# for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 
 
 def init_db(session: Session) -> None:
-    # Tables should be created with Alembic migrations
-    # But if you don't want to use migrations, create
-    # the tables un-commenting the next line
-
     user = session.exec(
         select(User).where(User.email == settings.FIRST_SUPERUSER),
     ).first()
@@ -23,3 +16,9 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = User.create(session, user_in)
+
+
+def init() -> None:
+    with Session(engine) as session:
+        SQLModel.metadata.create_all(engine)
+        init_db(session)
