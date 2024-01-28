@@ -1,5 +1,6 @@
 import logging
 
+from app.db.engine import engine
 from sqlmodel import Session, select
 from tenacity import (
     after_log,
@@ -8,8 +9,6 @@ from tenacity import (
     stop_after_attempt,
     wait_fixed,
 )
-
-from app.db.engine import engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

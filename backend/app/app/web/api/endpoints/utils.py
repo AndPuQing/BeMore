@@ -1,12 +1,11 @@
-from celery.result import AsyncResult
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from pydantic.networks import EmailStr
-
 from app.models import Message
 from app.utils import send_test_email
 from app.web.api.deps import get_current_active_superuser
 from app.worker import test_celery_worker
+from celery.result import AsyncResult
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from pydantic.networks import EmailStr
 
 router = APIRouter()
 

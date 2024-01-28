@@ -2,10 +2,9 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import pytest
+from app.web.application import get_app
 from fastapi import FastAPI
 from httpx import AsyncClient
-
-from app.web.application import get_app
 
 
 @pytest.fixture(scope="session")

@@ -1,9 +1,6 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-
 from app.core import security
 from app.core.config import settings
 from app.models import Message, NewPassword, Token, User, UserOut
@@ -13,6 +10,8 @@ from app.utils import (
     verify_password_reset_token,
 )
 from app.web.api.deps import CurrentUser, SessionDep
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 

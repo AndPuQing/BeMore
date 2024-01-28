@@ -1,11 +1,10 @@
 import inspect
 from typing import Union
 
-from celery import Task
-from sqlmodel import Session
-
 from app import source
 from app.core.celery_app import celery_app
+from celery import Task
+from sqlmodel import Session
 
 members = inspect.getmembers(source, inspect.isclass)
 for name, _class in members:

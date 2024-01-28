@@ -1,9 +1,8 @@
 import re
 from typing import Any
 
-from scrapy.http import HtmlResponse
-
 from app.source.base import RSSTask
+from scrapy.http import HtmlResponse
 
 CATEGORY_MAP = {
     "cs.AI": "Artificial Intelligence",

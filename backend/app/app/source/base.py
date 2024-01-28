@@ -4,12 +4,11 @@ from typing import Any
 
 import feedparser
 import requests
+from app.models import CrawledItem, Item
 from celery import Task
 from feedparser import FeedParserDict
 from scrapy.http import HtmlResponse
 from sqlmodel import Session, select
-
-from app.models import CrawledItem, Item
 
 
 def openreview_url(urls):

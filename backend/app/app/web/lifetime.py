@@ -1,9 +1,8 @@
 from collections.abc import Awaitable
 from typing import Callable
 
-from fastapi import FastAPI
-
 from app.db.init_db import init
+from fastapi import FastAPI
 
 
 def register_startup_event(

@@ -1,11 +1,10 @@
-from fastapi import FastAPI
-from fastapi.responses import UJSONResponse
-
 import app as appx  # just to get version
 from app.core.config import settings
 from app.log import configure_logging
 from app.web.api.router import api_router
 from app.web.lifetime import register_shutdown_event, register_startup_event
+from fastapi import FastAPI
+from fastapi.responses import UJSONResponse
 
 
 def get_app() -> FastAPI:

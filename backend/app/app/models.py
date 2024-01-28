@@ -2,12 +2,11 @@ import logging
 from datetime import datetime
 from typing import Any, Optional, Union
 
+from app.core.security import get_password_hash, verify_password
 from pydantic import EmailStr, HttpUrl
 from sqlalchemy.exc import IntegrityError, NoResultFound, OperationalError
 from sqlalchemy.orm.exc import FlushError
 from sqlmodel import JSON, AutoString, Column, Field, SQLModel, select
-
-from app.core.security import get_password_hash, verify_password
 
 
 class ActiveRecordMixin:

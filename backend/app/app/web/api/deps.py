@@ -1,17 +1,16 @@
 from collections.abc import Generator
 from typing import Annotated
 
+from app.core import security
+from app.core.config import settings
+from app.db.engine import engine
+from app.models import TokenPayload, User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
 from sqlmodel import Session
-
-from app.core import security
-from app.core.config import settings
-from app.db.engine import engine
-from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_STR}/login/access-token",

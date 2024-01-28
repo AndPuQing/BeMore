@@ -1,5 +1,4 @@
 import uvicorn
-
 from app.core.config import settings
 from app.gunicorn_runner import GunicornApplication
 

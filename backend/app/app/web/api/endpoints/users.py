@@ -1,9 +1,5 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import select
-from starlette import status
-
 from app.core.config import settings
 from app.models import (
     User,
@@ -19,6 +15,9 @@ from app.web.api.deps import (
     SessionDep,
     get_current_active_superuser,
 )
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import select
+from starlette import status
 
 router = APIRouter()
 

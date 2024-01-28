@@ -1,8 +1,7 @@
 from typing import Any
 
-from scrapy.http import HtmlResponse
-
 from app.source.base import PaperRequestsTask, openreview_url
+from scrapy.http import HtmlResponse
 
 
 class NIPS(PaperRequestsTask):

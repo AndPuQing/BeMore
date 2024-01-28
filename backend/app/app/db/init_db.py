@@ -1,8 +1,7 @@
-from sqlmodel import Session, SQLModel, select
-
 from app.core.config import settings
 from app.db.engine import engine
 from app.models import User, UserCreate  # noqa: F401
+from sqlmodel import Session, SQLModel, select
 
 
 def init_db(session: Session) -> None:
