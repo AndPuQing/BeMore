@@ -16,7 +16,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run black check
-      run: poetry run black --check .
+      run: poetry run -C backend/app black --check .
   flake8:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +30,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run flake8 check
-      run: poetry run flake8 --count .
+      run: poetry run -C backend/app flake8 --count .
 
   test:
     runs-on: ubuntu-latest
