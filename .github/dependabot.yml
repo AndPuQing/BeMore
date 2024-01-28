@@ -1,11 +1,12 @@
+---
 version: 2
 updates:
-  - package-ecosystem: "python"
-    directory: "/backend/app" # Location of package manifests
-    schedule:
-      interval: "weekly"
+    - package-ecosystem: python
+      directory: /backend/app # Location of package manifests
+      schedule:
+          interval: weekly
 
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
+    - package-ecosystem: docker
+      directory: /backend
+      schedule:
+          interval: weekly
