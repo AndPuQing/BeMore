@@ -66,7 +66,7 @@ def update_item(
     session: SessionDep,
     current_user: CurrentUser,
     id: int,
-    item_in: ItemUpdate
+    item_in: ItemUpdate,
 ) -> Any:
     """
     Update an item.

@@ -29,9 +29,9 @@ def __get_package_version() -> str:
 
         pyproject_toml_file = Path(__file__).parent.parent / "pyproject.toml"
         if pyproject_toml_file.exists() and pyproject_toml_file.is_file():
-            __package_version = toml.load(pyproject_toml_file)["tool"]["poetry"][
-                "version"
-            ]
+            __package_version = toml.load(pyproject_toml_file)["tool"][
+                "poetry"
+            ]["version"]
             # Indicate it might be locally modified or unreleased.
             __package_version = __package_version + "+"
 

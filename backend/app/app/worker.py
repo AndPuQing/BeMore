@@ -44,5 +44,4 @@ class DatabaseTask(Task):
     ignore_result=True,
 )
 def test_celery_worker(self: DatabaseTask, word: str) -> None:
-
     celery_app.send_task("Arxiv")
