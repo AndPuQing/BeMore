@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Any
 
 import feedparser
@@ -6,7 +7,7 @@ import requests
 from celery import Task
 from feedparser import FeedParserDict
 from scrapy.http import HtmlResponse
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.models import CrawledItem, Item
 
@@ -123,6 +124,28 @@ class RSSTask(Task):
     def post_parse(self, entry: dict[str, Any]) -> dict[str, Any]:
         return entry
 
+    def save(self, data: list[dict[str, Any]]) -> None:
+        with self.db as db:
+            # update Item table if exists
+            for item in data:
+                try:
+                    db.add(Item(**item, from_source=self.name))
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                    logging.warning(f"Duplicate item: {item['title']}")
+
+                    existing_item = db.exec(
+                        select(Item).where(Item.title == item["title"]),
+                    ).one()
+                    existing_item.category = item["category"]
+                    existing_item.url = item["url"]
+                    existing_item.abstract = item["abstract"]
+                    existing_item.authors = item["authors"]
+                    existing_item.last_updated = datetime.utcnow()
+                    db.add(existing_item)
+                    db.commit()
+
     def run(self):
         feed: FeedParserDict = feedparser.parse(self.url)
         results = []
@@ -134,4 +157,6 @@ class RSSTask(Task):
                 logging.warning(f"Empty title or abstract: {entry.link}")
                 continue
 
-            results.append((entry.link, item))
+            results.append(item)
+
+        self.save(results)

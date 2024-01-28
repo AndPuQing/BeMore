@@ -7,4 +7,5 @@ celery_app = Celery(
     broker="amqp://guest@bemore-queue//",
     backend="db+"
     + f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@bemore-db/{settings.POSTGRES_DB}",
+    broker_connection_retry_on_startup=True,
 )

@@ -55,7 +55,7 @@ class UserOut(UserBase):
 
 # Shared properties
 class ItemBase(SQLModel):
-    title: str = Field(nullable=False)
+    title: str = Field(nullable=False, unique=True)
     abstract: str = Field(nullable=False)
     keywords: Union[list[str], None] = Field(
         default=None,
@@ -91,6 +91,10 @@ class Item(ItemBase, table=True):
     category: Union[list[str], None] = Field(
         default=None,
         sa_column=Column(JSON),
+    )
+    last_updated: datetime = Field(
+        default_factory=datetime.utcnow,
+        nullable=False,
     )
 
 

@@ -24,6 +24,7 @@ services:
 
 
   backend:
+    tty: true
     container_name: bemore-backend
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     depends_on:
@@ -42,6 +43,7 @@ services:
         INSTALL_DEV: ${INSTALL_DEV-false}
 
   celeryworker:
+    tty: true
     container_name: bemore-celeryworker
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
     depends_on:

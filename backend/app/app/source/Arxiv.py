@@ -1,16 +1,43 @@
-import logging
 import re
 from typing import Any
 
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequestsTask, RSSTask
+from app.source.base import RSSTask
+
+CATEGORY_MAP = {
+    "cs.AI": "Artificial Intelligence",
+    "cs.AR": "Hardware Architecture",
+    "cs.CC": "Computational Complexity",
+    "cs.CE": "Computational Engineering, Finance, and Science",
+    "cs.CG": "Computational Geometry",
+    "cs.CL": "Computation and Language",
+    "cs.CR": "Cryptography and Security",
+    "cs.CV": "Computer Vision and Pattern Recognition",
+    "cs.CY": "Computers and Society",
+    "cs.DB": "Databases",
+    "cs.DC": "Distributed, Parallel, and Cluster Computing",
+    "cs.DL": "Digital Libraries",
+    "cs.DM": "Discrete Mathematics",
+    "cs.DS": "Data Structures and Algorithms",
+    "cs.ET": "Emerging Technologies",
+    "cs.FL": "Formal Languages and Automata Theory",
+    "cs.GL": "General Literature",
+    "cs.GR": "Graphics",
+    "cs.GT": "Computer Science and Game Theory",
+    "cs.HC": "Human-Computer Interaction",
+    "cs.IR": "Information Retrieval",
+    "cs.IT": "Information Theory",
+    "cs.LG": "Learning",
+    "cs.LO": "Logic in Computer Science",
+    "cs.MA": "Multiagent Systems",
+    "cs.MM": "Multimedia",
+}
 
 
 class Arxiv(RSSTask):
     url: str = "http://export.arxiv.org/rss/cs"
     name: str = "Arxiv"
-    _cache_category_map: dict[str, str] = {}
 
     @staticmethod
     def parse(entry: dict) -> dict[str, Any]:
@@ -21,29 +48,8 @@ class Arxiv(RSSTask):
             "abstract": entry["summary"],
         }
 
-    @property
-    def category_map(self):
-        if not self._cache_category_map:
-            response = PaperRequestsTask._request(
-                "https://arxiv.org/category_taxonomy",
-            )
-            if response is None:
-                return {}
-            response = HtmlResponse(
-                url="",
-                body=response.text,
-                encoding="utf-8",
-            )
-            category = response.css("h4::text").getall()
-            full_name = response.css("span::text").getall()
-            for i, c in enumerate(category):
-                self._cache_category_map[c] = (
-                    full_name[i].replace("(", "").replace(")", "")
-                )
-
-        return self._cache_category_map
-
     def post_parse(self, entry: dict[str, Any]) -> dict[str, Any]:
+        category = re.findall(r"\[(.*?)\]", entry["title"])[0]
         entry["title"] = entry["title"].split("(", 1)[0]
         entry["authors"] = (
             HtmlResponse(url="", body=entry["authors"], encoding="utf-8")
@@ -55,10 +61,5 @@ class Arxiv(RSSTask):
             .css("p::text")
             .get()
         )
-        category = re.findall(r"\[(.*?)\]", entry["title"])[0]
-        if category in Arxiv.category_map:
-            entry["category"] = self.category_map[category]
-        else:
-            logging.warning(f"Unknown category: {category}")
-            entry["category"] = None
+        entry["category"] = category
         return entry

@@ -43,8 +43,11 @@ services:
     command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --broker_api=http://guest:guest@bemore-queue:15672/api/
     ports:
       - "5555:5555"
+    environment:
+      - FLOWER_UNAUTHENTICATED_API=true
 
   backend:
+    tty: true
     container_name: bemore-backend
     image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     depends_on:
@@ -65,6 +68,7 @@ services:
       - ./backend/app:/app
 
   celeryworker:
+    tty: true
     container_name: bemore-celeryworker
     image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
     depends_on:
