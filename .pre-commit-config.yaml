@@ -11,15 +11,17 @@ repos:
           - id: detect-private-key
           - id: end-of-file-fixer
           - id: check-toml
-          - id: check-yaml
-            args: [--unsafe]
-          - id: trailing-whitespace
+
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.21.0
+      hooks:
+          - id: yamllint
+            args: [--format, parsable, --strict]
 
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-      rev: 0.2.1
+      rev: 0.2.3
       hooks:
           - id: yamlfmt
-
     - repo: local
       hooks:
           - id: black
