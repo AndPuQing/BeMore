@@ -7,6 +7,8 @@ from sqlalchemy.exc import IntegrityError, NoResultFound, OperationalError
 from sqlalchemy.orm.exc import FlushError
 from sqlmodel import JSON, AutoString, Column, Field, SQLModel, select
 
+from app.core.security import get_password_hash, verify_password
+
 
 class ActiveRecordMixin:
     __config__ = None
@@ -87,11 +89,10 @@ class ActiveRecordMixin:
         update: Optional[dict] = None,
     ) -> Optional[SQLModel]:
         obj = cls.convert_without_saving(source, update)
-        if obj is None:
-            return None
         if obj.save(session):
             return obj
-        return None
+        else:
+            return None
 
     @classmethod
     def create_or_update(
@@ -194,6 +195,43 @@ class UserUpdateMe(SQLModel):
 class User(ActiveRecordMixin, UserBase, table=True):
     id: Union[int, None] = Field(default=None, primary_key=True)
     hashed_password: str
+
+    @classmethod
+    def authenticate(
+        cls, session, *, email: str, password: str
+    ) -> Optional["User"]:
+        user = User.one_by_field(session, "email", email)
+        if not user:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user
+
+    @classmethod
+    def create(
+        cls,
+        session,
+        source: Union[UserCreate, UserCreateOpen],
+    ) -> Optional[SQLModel]:
+        obj = User(
+            **source.model_dump(exclude={"password"}, exclude_unset=True),
+            hashed_password=get_password_hash(source.password),
+        )
+        if obj.save(session):
+            return obj
+        else:
+            return None
+
+    def update(self, session, source: Union[dict, SQLModel]):
+        if isinstance(source, SQLModel):
+            source = source.model_dump(exclude_unset=True)
+
+        if "password" in source:
+            source["hashed_password"] = get_password_hash(source["password"])
+            del source["password"]
+        for key, value in source.items():
+            setattr(self, key, value)
+        self.save(session)
 
 
 # Properties to return via API, id is always required

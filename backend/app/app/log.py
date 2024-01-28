@@ -58,6 +58,9 @@ def configure_logging() -> None:  # pragma: no cover
 
     logging.getLogger("gunicorn").handlers = [intercept_handler]
     logging.getLogger("gunicorn.access").handlers = [intercept_handler]
+
+    logging.getLogger("passlib").setLevel(logging.ERROR)
+
     # set logs output, level and format
     logger.remove()
     logger.add(

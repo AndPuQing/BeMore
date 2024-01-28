@@ -1,7 +1,6 @@
 from sqlmodel import Session, select
 
 from app.core.config import settings
-from app.crud.crud_user import user as crud
 from app.models import User, UserCreate  # noqa: F401
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
@@ -23,4 +22,4 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.create(db=session, obj_in=user_in)
+        user = User.create(session, user_in)
