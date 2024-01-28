@@ -8,6 +8,10 @@ jobs:
     steps:
     - run: sudo snap install --edge --classic just
     - uses: actions/checkout@v4
+    - name: Cache Docker images.
+      uses: ScribeMD/docker-cache@0.3.7
+      with:
+        key: docker-${{ hashFiles('docker-compose.ci.yml') }}
     - run: just test
     - uses: codecov/codecov-action@v3
       with:
