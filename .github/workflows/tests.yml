@@ -13,11 +13,11 @@ jobs:
       with:
         key: docker-${{ hashFiles('docker-compose.ci.yml') }}
     - run: just test
-    - uses: codecov/codecov-action@v4-beta
+    - uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         flags: unittests
         working-directory: ./backend/app/
         directory: ./backend/app/
-        fail_ci_if_error: true
+        fail_ci_if_error: false
         verbose: true
