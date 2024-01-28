@@ -20,5 +20,5 @@ dev-logs:
   docker-compose -f docker-compose.dev.yml logs -f
 
 test:
-  INSTALL_DEV=true docker-compose up -d --build
+  docker-compose -f docker-compose.ci.yml up -d --build
   docker-compose exec -T backend poetry run pytest --cov=app --cov-report=term-missing --cov-report=html app/tests
