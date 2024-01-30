@@ -1,7 +1,7 @@
 codecov:
   disable_default_path_fixes: true
 fixes:
-- ::backend/app/app
+  - ::backend/app/app
 
 comment:
   layout: diff,flags,tree,betaprofiling
