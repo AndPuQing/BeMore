@@ -122,3 +122,7 @@ You can read more about pre-commit here: https://pre-commit.com/
 
 
 ## ~~Running tests~~
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AndPuQing/BeMore&type=Date)](https://star-history.com/#AndPuQing/BeMore&Date)
