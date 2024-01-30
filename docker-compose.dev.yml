@@ -2,7 +2,7 @@ version: "3.3"
 services:
   db:
     container_name: bemore-db
-    image: postgres:12
+    image: postgres:16
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
