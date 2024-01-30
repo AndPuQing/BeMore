@@ -1,39 +1,39 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
-  hooks:
-  - id: check-added-large-files
-  - id: check-merge-conflict
-  - id: check-symlinks
-  - id: detect-private-key
-  - id: end-of-file-fixer
-  - id: check-toml
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: check-toml
 
-- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.12.0
-  hooks:
-  - id: pretty-format-yaml
-    args: [--autofix, --indent, '2']
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v3.1.0" # Use the sha / tag you want to point at
+    hooks:
+      - id: prettier
+        types_or: [yaml]
 
-- repo: https://github.com/psf/black.git
-  rev: 23.3.0
-  hooks:
-  - id: black
-    files: (.*\.(py|pyi))$
+  - repo: https://github.com/psf/black.git
+    rev: 23.3.0
+    hooks:
+      - id: black
+        files: (.*\.(py|pyi))$
 
-- repo: https://github.com/PyCQA/flake8
-  rev: 5.0.4
-  hooks:
-  - id: flake8
-    args: [--config=.flake8]
+  - repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+        args: [--config=.flake8]
 
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.5
-  hooks:
-  - id: ruff
-    args: [--fix, --exit-non-zero-on-fix, --no-cache]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.5
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --no-cache]
 
 ci:
   autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
