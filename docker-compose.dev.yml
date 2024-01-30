@@ -22,7 +22,7 @@ services:
     env_file:
       - .env
     environment:
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     networks:
       - default
   queue:
@@ -49,7 +49,7 @@ services:
   backend:
     tty: true
     container_name: bemore-backend
-    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
     depends_on:
       - db
     env_file:
@@ -70,7 +70,7 @@ services:
   celeryworker:
     tty: true
     container_name: bemore-celeryworker
-    image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
+    image: "${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}"
     depends_on:
       - db
       - queue
@@ -86,7 +86,6 @@ services:
       dockerfile: celeryworker.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-true}
-
 
 volumes:
   app-db-data:

@@ -12,7 +12,6 @@ services:
     networks:
       - default
 
-
   queue:
     container_name: bemore-queue
     image: rabbitmq:3
@@ -21,12 +20,10 @@ services:
     #
     # You also have to change the flower command
 
-
-
   backend:
     tty: true
     container_name: bemore-backend
-    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
     depends_on:
       - db
     env_file:
@@ -45,7 +42,7 @@ services:
   celeryworker:
     tty: true
     container_name: bemore-celeryworker
-    image: '${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}'
+    image: "${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}"
     depends_on:
       - db
       - queue
@@ -59,7 +56,6 @@ services:
       dockerfile: celeryworker.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
-
 
 volumes:
   app-db-data:

@@ -1,16 +1,16 @@
-version: '3.3'
+version: "3.3"
 services:
   db:
     container_name: bemore-db
     image: postgres:12
     volumes:
-    - app-db-data:/var/lib/postgresql/data/pgdata
+      - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
-    - .env
+      - .env
     environment:
-    - PGDATA=/var/lib/postgresql/data/pgdata
+      - PGDATA=/var/lib/postgresql/data/pgdata
     networks:
-    - default
+      - default
 
   queue:
     container_name: bemore-queue
@@ -20,48 +20,46 @@ services:
     #
     # You also have to change the flower command
 
-
   backend:
     tty: true
     container_name: bemore-backend
     image: ${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}
     depends_on:
-    - db
+      - db
     env_file:
-    - .env
+      - .env
     environment:
       # Allow explicit env var override for tests
-    - SMTP_HOST=${SMTP_HOST}
+      - SMTP_HOST=${SMTP_HOST}
     ports:
-    - 8000:8001
+      - 8000:8001
     build:
       context: ./backend
       dockerfile: backend.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-true}
     volumes:
-    - ./backend/app:/app
+      - ./backend/app:/app
 
   celeryworker:
     tty: true
     container_name: bemore-celeryworker
     image: ${DOCKER_IMAGE_CELERYWORKER?Variable not set}:${TAG-latest}
     depends_on:
-    - db
-    - queue
+      - db
+      - queue
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./backend/app:/app
+      - ./backend/app:/app
     environment:
       # Allow explicit env var override for tests
-    - SMTP_HOST=${SMTP_HOST?Variable not set}
+      - SMTP_HOST=${SMTP_HOST?Variable not set}
     build:
       context: ./backend
       dockerfile: celeryworker.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-true}
-
 
 volumes:
   app-db-data:
