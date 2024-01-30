@@ -3,7 +3,12 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
-from app.models import Item, ItemCreate, ItemOut, ItemUpdate
+from app.models import (
+    Item,
+    ItemCreate,
+    ItemOut,
+    ItemUpdate,
+)
 from app.web.api.deps import CurrentUser, SessionDep
 
 router = APIRouter()
