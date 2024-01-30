@@ -34,14 +34,10 @@ feedparser = "^6.0.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.0.0"
-flake8 = "~7.0.0"
-pre-commit = "^3.0.1"
-black = "^24.1.1"
 pytest-cov = "^4.0.0"
 anyio = "^4.2.0"
 pytest-env = "^1.1.3"
 httpx = "^0.26.0"
-ruff = "^0.1.13"
 
 
 [build-system]
@@ -58,89 +54,89 @@ target-version = "py39"
 
 [tool.ruff.lint]
 select = [
-    # Pycodestyle
-    "E",
-    "W",
+  # Pycodestyle
+  "E",
+  "W",
 
-    # Pyflakes
-    "F",
+  # Pyflakes
+  "F",
 
-    # Isort
-    "I",
+  # Isort
+  "I",
 
-    # Comprehensions
-    "C4",
+  # Comprehensions
+  "C4",
 
-    # Debugger
-    "T100",
+  # Debugger
+  "T100",
 
-    # Pyupgrade
-    "UP",
+  # Pyupgrade
+  "UP",
 
-    # NumPy-specific rules
-    "NPY001",
-    "NPY003",
+  # NumPy-specific rules
+  "NPY001",
+  "NPY003",
 
-    # Bugbear
-    "B002",
-    "B003",
-    "B004",
-    "B009",
-    "B010",
-    "B011",
-    "B012",
-    "B013",
-    "B014",
-    "B015",
-    "B016",
-    "B017",
-    "B018",
-    "B019",
-    "B020",
-    "B021",
-    "B022",
-    "B025",
-    "B029",
-    "B032",
+  # Bugbear
+  "B002",
+  "B003",
+  "B004",
+  "B009",
+  "B010",
+  "B011",
+  "B012",
+  "B013",
+  "B014",
+  "B015",
+  "B016",
+  "B017",
+  "B018",
+  "B019",
+  "B020",
+  "B021",
+  "B022",
+  "B025",
+  "B029",
+  "B032",
 
-    # Pylint
-    "PLE",
-    "PLC0414",
-    "PLC3002",
-    "PLR0206",
-    "PLR0402",
-    "PLR1701",
-    "PLR1711",
-    "PLR1722",
-    "PLW3301",
+  # Pylint
+  "PLE",
+  "PLC0414",
+  "PLC3002",
+  "PLR0206",
+  "PLR0402",
+  "PLR1701",
+  "PLR1711",
+  "PLR1722",
+  "PLW3301",
 
-    # Pygrep-hooks
-    "PGH004",
+  # Pygrep-hooks
+  "PGH004",
 ]
 unfixable = ["NPY001"]
 ignore = [
-    # Whitespace before ‘,’, ‘;’, or ‘:’, it is not compatible with black
-    "E203",
-    # Module level import not at top of file
-    "E402",
-    # Line too long (82 > 79 characters)
-    "E501",
-    # Do not compare types, use `isinstance()`
-    "E721",
-    # Do not use bare except, specify exception instead
-    "E722",
-    # Do not assign a lambda expression, use a def
-    "E731",
-    # Do not use variables named ‘l’, ‘O’, or ‘I’
-    "E741",
-    # `name` may be undefined, or defined from star imports: `module`
-    "F405",
-    # Local variable name is assigned to but never used
-    "F841",
-    # It not met the "Explicit is better than implicit" rule
-    "UP015",
-    # It will cause the performance regression on python3.10
-    "UP038",
+  # Whitespace before ‘,’, ‘;’, or ‘:’, it is not compatible with black
+  "E203",
+  # Module level import not at top of file
+  "E402",
+  # Line too long (82 > 79 characters)
+  "E501",
+  # Do not compare types, use `isinstance()`
+  "E721",
+  # Do not use bare except, specify exception instead
+  "E722",
+  # Do not assign a lambda expression, use a def
+  "E731",
+  # Do not use variables named ‘l’, ‘O’, or ‘I’
+  "E741",
+  # `name` may be undefined, or defined from star imports: `module`
+  "F405",
+  # Local variable name is assigned to but never used
+  "F841",
+  # It not met the "Explicit is better than implicit" rule
+  "UP015",
+  # It will cause the performance regression on python3.10
+  "UP038",
 ]
 
 [tool.ruff.lint.isort]
