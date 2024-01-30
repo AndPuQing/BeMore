@@ -9,6 +9,7 @@ Bemore is a web application that helps you to keep up with the latest research i
  </a>
 <a href="https://github.com/AndPuQing/BeMore/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://results.pre-commit.ci/latest/github/AndPuQing/BeMore/develop"><img alt="pre-commit.ci status" src="https://results.pre-commit.ci/badge/github/AndPuQing/BeMore/develop.svg"></a>
 </p>
 
 
