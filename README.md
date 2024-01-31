@@ -16,6 +16,7 @@ Bemore is a web application that helps you to keep up with the latest research i
 ## Structure
 
 ![Structure](./assets/arch.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore?ref=badge_shield)
 
 
 ## TODO
@@ -126,3 +127,7 @@ You can read more about pre-commit here: https://pre-commit.com/
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=AndPuQing/BeMore&type=Date)](https://star-history.com/#AndPuQing/BeMore&Date)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore?ref=badge_large)
