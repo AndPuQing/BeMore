@@ -1,3 +1,5 @@
+import logging
+
 from sqlmodel import Session, SQLModel, select
 
 from app.core.config import settings
@@ -16,6 +18,7 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = User.create(session, user_in)
+        logging.debug(f"Superuser {settings.FIRST_SUPERUSER} created")
 
 
 async def init():

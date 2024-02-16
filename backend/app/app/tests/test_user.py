@@ -1,11 +1,10 @@
 import pytest
-from fastapi import FastAPI
 from httpx import AsyncClient
 from starlette import status
 
 
 @pytest.mark.anyio
-async def test_create_user(client: AsyncClient, fastapi_app: FastAPI) -> None:
+async def test_create_user(client: AsyncClient) -> None:
     """
     Checks the health endpoint.
 

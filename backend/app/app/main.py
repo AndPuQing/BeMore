@@ -13,9 +13,9 @@ def main():
     if settings.reload:
         uvicorn.run(
             "app.web.application:get_app",
-            workers=settings.workers_count,
             host=settings.host,
             port=settings.port,
+            workers=settings.workers_count,
             reload=settings.reload,
             log_level=settings.log_level.value.lower(),
             factory=True,

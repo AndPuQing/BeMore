@@ -25,6 +25,7 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: "False"
     networks:
       - default
+
   queue:
     container_name: bemore-queue
     image: rabbitmq:3-management

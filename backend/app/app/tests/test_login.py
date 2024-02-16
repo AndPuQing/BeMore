@@ -1,11 +1,10 @@
 import pytest
-from fastapi import FastAPI
 from httpx import AsyncClient
 from starlette import status
 
 
 @pytest.mark.anyio
-async def test_login(client: AsyncClient, fastapi_app: FastAPI) -> None:
+async def test_login(client: AsyncClient) -> None:
     """
     Checks the health endpoint.
 
@@ -24,7 +23,7 @@ async def test_login(client: AsyncClient, fastapi_app: FastAPI) -> None:
 
 
 @pytest.mark.anyio
-async def test_token(client: AsyncClient, fastapi_app: FastAPI) -> None:
+async def test_token(client: AsyncClient) -> None:
     """
     Checks the health endpoint.
 
