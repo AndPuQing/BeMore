@@ -22,7 +22,7 @@ Bemore is a web application that helps you to keep up with the latest research i
 ## TODO
 
 - [x] Add docker-compose for development
-- [ ] Add more paper sources(e.g. arxiv, AAAI, ICLR, etc.)
+- [x] Add more paper sources(e.g. arxiv, AAAI, ICLR, etc.)
 - [ ] Recommendation system
   - [x] User subscription api endpoint
   - [ ] User feedback api endpoint
@@ -31,7 +31,7 @@ Bemore is a web application that helps you to keep up with the latest research i
   - [ ] Base dataset for recommendation
 - [ ] Admin panel
 - [ ] Add tests
-- [ ] Add CI/CD
+- [x] Add CI/CD
 
 ## Development
 
