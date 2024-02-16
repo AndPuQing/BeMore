@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     """
     app.middleware_stack = None
     app.middleware_stack = app.build_middleware_stack()
-    init()
+    await init()
     yield
     pass
 

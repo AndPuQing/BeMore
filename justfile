@@ -19,8 +19,9 @@ dev-stop:
 dev-logs:
   docker-compose -f docker-compose.dev.yml logs -f
 
-test:
+test: clean
   docker-compose -f docker-compose.ci.yml up -d --build
+  sleep 0.5
   docker-compose exec -T backend poetry run pytest --cov=app --cov-report=xml
 
 clean:

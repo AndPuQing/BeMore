@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     API_STR: str = "/api"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     host: str = "0.0.0.0"
-    port: int = 8001
+    port: int = 8000
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading

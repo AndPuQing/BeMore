@@ -18,7 +18,7 @@ def init_db(session: Session) -> None:
         user = User.create(session, user_in)
 
 
-def init() -> None:
+async def init():
     with Session(engine) as session:
         SQLModel.metadata.create_all(engine)
         init_db(session)
