@@ -10,13 +10,13 @@ Bemore is a web application that helps you to keep up with the latest research i
 <a href="https://github.com/AndPuQing/BeMore/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 <a href="https://results.pre-commit.ci/latest/github/AndPuQing/BeMore/develop"><img alt="pre-commit.ci status" src="https://results.pre-commit.ci/badge/github/AndPuQing/BeMore/develop.svg"></a>
+<a herf="https://app.fossa.com/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore?ref=badge_shield"><img alt="FOSSA Status" src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore.svg?type=shield"></a>
 </p>
 
 
 ## Structure
 
 ![Structure](./assets/arch.png)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FAndPuQing%2FBeMore?ref=badge_shield)
 
 
 ## TODO
