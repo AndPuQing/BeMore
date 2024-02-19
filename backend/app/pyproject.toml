@@ -16,7 +16,7 @@ yarl = "^1.9.2"
 ujson = "^5.8.0"
 httptools = "^0.6.0"
 loguru = "^0.7.0"
-sqlmodel = "^0.0.14"
+sqlmodel = "^0.0.16"
 python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 passlib = "^1.7.4"
 emails = "^0.6"
