@@ -1,8 +1,6 @@
-from typing import Any
-
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequestsTask, openreview_url
+from app.source.base import PaperRequestsTask, PaperType, openreview_url
 
 
 class NIPS(PaperRequestsTask):
@@ -34,9 +32,9 @@ class NIPS(PaperRequestsTask):
         return item
 
     @staticmethod
-    def post_parse(item: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(item: PaperType) -> PaperType:
         if item["authors"] is not None:
-            item["authors"] = item["authors"].split(" · ")
+            item["authors"] = item["authors"].split(" · ")  # type: ignore
         if item["authors"] is not None:
             for i, author in enumerate(item["authors"]):
                 item["authors"][i] = author.strip()

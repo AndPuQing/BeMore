@@ -3,7 +3,7 @@ from typing import Any
 
 from scrapy.http import HtmlResponse
 
-from app.source.base import RSSTask
+from app.source.base import PaperType, RSSTask
 
 CATEGORY_MAP = {
     "cs.AI": "Artificial Intelligence",
@@ -48,7 +48,7 @@ class Arxiv(RSSTask):
             "abstract": entry["summary"],
         }
 
-    def post_parse(self, entry: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(self, entry: PaperType) -> PaperType:
         category = re.findall(r"\[(.*?)\]", entry["title"])[0]
         entry["title"] = entry["title"].split("(", 1)[0]
         entry["authors"] = (

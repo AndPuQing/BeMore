@@ -1,10 +1,8 @@
-from typing import Any
+import xml.dom.minidom
 
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequestsTask
-
-import xml.dom.minidom
+from app.source.base import PaperRequestsTask, PaperType
 
 
 class AAAI(PaperRequestsTask):
@@ -43,7 +41,7 @@ class AAAI(PaperRequestsTask):
         return item
 
     @staticmethod
-    def post_parse(item: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(item: PaperType) -> PaperType:
         if item["authors"] is not None:
             for i, author in enumerate(item["authors"]):
                 item["authors"][i] = author.strip()
