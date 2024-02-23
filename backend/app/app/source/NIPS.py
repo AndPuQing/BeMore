@@ -1,4 +1,3 @@
-from typing import Any
 
 from scrapy.http import HtmlResponse
 

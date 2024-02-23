@@ -1,10 +1,9 @@
-from typing import Any
+
+import xml.dom.minidom
 
 from scrapy.http import HtmlResponse
 
 from app.source.base import PaperRequestsTask, PaperType
-
-import xml.dom.minidom
 
 
 class AAAI(PaperRequestsTask):
