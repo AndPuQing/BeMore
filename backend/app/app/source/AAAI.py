@@ -2,7 +2,7 @@ from typing import Any
 
 from scrapy.http import HtmlResponse
 
-from app.source.base import PaperRequestsTask
+from app.source.base import PaperRequestsTask, PaperType
 
 import xml.dom.minidom
 
@@ -43,7 +43,7 @@ class AAAI(PaperRequestsTask):
         return item
 
     @staticmethod
-    def post_parse(item: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(item: PaperType) -> PaperType:
         if item["authors"] is not None:
             for i, author in enumerate(item["authors"]):
                 item["authors"][i] = author.strip()

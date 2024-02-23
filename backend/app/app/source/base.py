@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional, TypedDict
 
 import feedparser
 import requests
@@ -10,6 +10,15 @@ from scrapy.http import HtmlResponse
 from sqlmodel import Session, select
 
 from app.models import CrawledItem, Item
+
+
+class PaperType(TypedDict):
+    title: str
+    abstract: Optional[str]
+    url: str
+    authors: Optional[list[str]]
+    category: Optional[list[str]]
+    keywords: Optional[list[str]]
 
 
 def openreview_url(urls):
@@ -46,7 +55,7 @@ class PaperRequestsTask(Task):
         return cls.parse_urls(response)
 
     @staticmethod
-    def parse(response: HtmlResponse) -> dict[str, str]:
+    def parse(response: HtmlResponse) -> PaperType:
         # you should return dict with fields:
         # title, abstract, url
         raise NotImplementedError
@@ -81,7 +90,7 @@ class PaperRequestsTask(Task):
             db.commit()
 
     @staticmethod
-    def post_parse(data: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(data: PaperType) -> PaperType:
         # you can do some post processing here
         return data
 
@@ -118,13 +127,13 @@ class RSSTask(Task):
         return Session(engine)
 
     @staticmethod
-    def parse(entry) -> dict[str, Any]:
+    def parse(entry) -> PaperType:
         raise NotImplementedError
 
-    def post_parse(self, entry: dict[str, Any]) -> dict[str, Any]:
+    def post_parse(self, entry: PaperType) -> PaperType:
         return entry
 
-    def save(self, data: list[dict[str, Any]]) -> None:
+    def save(self, data: list[PaperType]) -> None:
         with self.db as db:
             # update Item table if exists
             for item in data:
