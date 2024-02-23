@@ -1,4 +1,3 @@
-
 from scrapy.http import HtmlResponse
 
 from app.source.base import PaperRequestsTask, PaperType, openreview_url

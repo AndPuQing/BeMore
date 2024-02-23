@@ -1,4 +1,3 @@
-
 import xml.dom.minidom
 
 from scrapy.http import HtmlResponse
