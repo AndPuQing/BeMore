@@ -12,6 +12,7 @@ from sqlmodel import (
     AutoString,
     Column,
     Field,
+    LargeBinary,
     SQLModel,
     select,
 )
@@ -290,6 +291,10 @@ class Item(ActiveRecordMixin, ItemBase, table=True):
     category: Union[list[str], None] = Field(
         default=None,
         sa_column=Column(JSON),
+    )
+    doc2vec: Union[list[float], None] = Field(
+        default=None,
+        sa_column=Column(LargeBinary),
     )
 
 

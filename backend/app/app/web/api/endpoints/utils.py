@@ -6,7 +6,7 @@ from pydantic.networks import EmailStr
 from app.models import Message
 from app.utils import send_test_email
 from app.web.api.deps import get_current_active_superuser
-from app.worker import paper_crawler
+from app.worker import paper_crawler, train_doc2vec
 
 router = APIRouter()
 
@@ -48,6 +48,19 @@ def test_celery() -> TaskOut:
     Test celery.
     """
     task = paper_crawler.delay()
+    return _to_task_out(task)
+
+
+@router.get(
+    "/test-doc2vec",
+    dependencies=[Depends(get_current_active_superuser)],
+    status_code=201,
+)
+def test_doc2vec() -> TaskOut:
+    """
+    Test doc2vec.
+    """
+    task = train_doc2vec.delay()
     return _to_task_out(task)
 
 
