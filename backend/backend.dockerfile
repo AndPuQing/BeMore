@@ -1,10 +1,11 @@
-FROM python:3.12-alpine
+FROM python:3.10-alpine
 
 WORKDIR /app/
 
-
 # Install Poetry
 RUN pip install poetry --no-cache-dir && poetry config virtualenvs.create false
+
+RUN apk add --no-cache gcc musl-dev g++
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./app/pyproject.toml ./app/poetry.lock* /app/
