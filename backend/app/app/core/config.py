@@ -65,6 +65,7 @@ class Settings(BaseSettings):
 
     # requests settings
     REQUESTS_BATCH_SIZE: int = 2
+    CRAWL_INTERVAL: int = 60 * 60 * 24 * 7  # 1 week
 
     model_config = SettingsConfigDict(
         env_file=".env",

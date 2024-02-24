@@ -1,37 +1,26 @@
 import inspect
+import logging
+from datetime import datetime, timedelta
 from typing import Union
 
 from celery import Task
-from celery.schedules import crontab
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app import source
 from app.core.celery_app import celery_app
+from app.core.config import settings
+from app.models import CrawledItem
+from app.source.base import PaperRequestsTask
 
 
 @celery_app.on_after_configure.connect  # type: ignore
 def setup_periodic_tasks(sender, **kwargs):
-    # Calls test('hello') every 10 seconds.
-    sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
-
-    # Calls test('hello') every 30 seconds.
-    # It uses the same signature of previous task, an explicit name is
-    # defined to avoid this task replacing the previous one defined.
-    sender.add_periodic_task(30.0, test.s('hello'), name='add every 30')
-
-    # Calls test('world') every 30 seconds
-    sender.add_periodic_task(30.0, test.s('world'), expires=10)
-
-    # Executes every Monday morning at 7:30 a.m.
-    sender.add_periodic_task(
-        crontab(hour=7, minute=30, day_of_week=1),
-        test.s('Happy Mondays!'),
-    )
-
-
-@celery_app.task
-def test(arg):
-    print(arg)
+    # sender.add_periodic_task(
+    #     crontab(minute="10"),
+    #     paper_crawler.s(),
+    #     name="crawl papers",
+    # )
+    pass
 
 
 members = inspect.getmembers(source, inspect.isclass)
@@ -70,5 +59,34 @@ class DatabaseTask(Task):
     bind=True,
     ignore_result=True,
 )
-def test_celery_worker(self: DatabaseTask, word: str) -> None:
-    celery_app.send_task("Arxiv")
+def paper_crawler(self: DatabaseTask) -> None:
+    """
+    Celery task to crawl papers from arxiv.
+    """
+    for name, _class in members:
+        if issubclass(_class, PaperRequestsTask):
+            urls = _class.get_urls()
+            # duplicate urls
+            urls = list(set(urls))
+            # duplicate usls from db
+            with self.db as db:
+                crawled_urls = db.exec(
+                    select(CrawledItem).where(
+                        (CrawledItem.last_crawled - datetime.now())
+                        <= timedelta(days=7)
+                    )
+                )
+                crawled_urls = [item.raw_url for item in crawled_urls]
+            urls = list(set(urls) - set(crawled_urls))
+            if len(urls) > settings.REQUESTS_BATCH_SIZE:
+                for batch_urls in batch(urls, settings.REQUESTS_BATCH_SIZE):
+                    logging.info(
+                        f"Start crawling {name} with {len(batch_urls)} urls"
+                    )
+                    celery_app.send_task(name, args=[batch_urls])
+            else:
+                logging.info(f"Start crawling {name} with {len(urls)} urls")
+                celery_app.send_task(name, args=[urls])
+        else:
+            logging.info(f"Start crawling {name}")
+            celery_app.send_task(name)
