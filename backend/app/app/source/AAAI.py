@@ -11,8 +11,8 @@ class AAAI(PaperRequestsTask):
     )
     name: str = "AAAI"
 
-    @staticmethod
-    def parse_urls(response: HtmlResponse) -> list[str]:
+    @classmethod
+    def parse_urls(cls, response: HtmlResponse) -> list[str]:
         _xml = response.text
         domTree = xml.dom.minidom.parseString(_xml)
         collection = domTree.documentElement

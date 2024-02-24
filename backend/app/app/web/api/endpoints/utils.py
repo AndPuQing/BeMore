@@ -6,7 +6,7 @@ from pydantic.networks import EmailStr
 from app.models import Message
 from app.utils import send_test_email
 from app.web.api.deps import get_current_active_superuser
-from app.worker import test_celery_worker
+from app.worker import paper_crawler
 
 router = APIRouter()
 
@@ -39,15 +39,15 @@ def health_check() -> Message:
 
 
 @router.post(
-    "/texst-celery",
+    "/test-celery",
     dependencies=[Depends(get_current_active_superuser)],
     status_code=201,
 )
-def test_celery(word: str) -> TaskOut:
+def test_celery() -> TaskOut:
     """
     Test celery.
     """
-    task = test_celery_worker.delay(word)
+    task = paper_crawler.delay()
     return _to_task_out(task)
 
 
