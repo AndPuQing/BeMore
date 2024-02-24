@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Optional, TypedDict
+from typing import Optional, TypedDict
 
 import feedparser
 import requests
@@ -25,6 +25,8 @@ def openreview_url(urls):
     for url in urls[::-1]:
         if "openreview" in url:
             return url
+    if len(urls) == 0:
+        return None
     return urls[0]  # if no openreview url, return the first url
 
 
@@ -32,6 +34,7 @@ class PaperRequestsTask(Task):
     url: str
     ignore_result: bool = True
     name: str
+    rate_limit = "30/m"
 
     @property
     def db(self):
@@ -42,8 +45,8 @@ class PaperRequestsTask(Task):
 
         return Session(engine)
 
-    @staticmethod
-    def parse_urls(response: HtmlResponse) -> list[str]:
+    @classmethod
+    def parse_urls(cls, response: HtmlResponse) -> list[str]:
         # you should return list of absolute urls
         raise NotImplementedError
 
@@ -72,11 +75,26 @@ class PaperRequestsTask(Task):
             return
         return HtmlResponse(url=url, body=response.content, encoding="utf-8")
 
-    def save(self, data: list[tuple[str, dict[str, Any]]]) -> None:
+    def save(self, data: list[tuple[str, PaperType]]) -> None:
         with self.db as db:
             objs = [CrawledItem(raw_url=item[0]) for item in data]
-            db.add_all(objs)
-            db.commit()
+            for item in objs:
+                try:
+                    db.add(item)
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                    logging.warning(f"Duplicate item: {item.raw_url}")
+
+                    # update CrawledItem table if exists
+                    existing_item = db.exec(
+                        select(CrawledItem).where(
+                            CrawledItem.raw_url == item.raw_url
+                        ),
+                    ).one()
+                    existing_item.last_crawled = datetime.utcnow()
+                    db.add(existing_item)
+                    db.commit()
 
             # TODO: add relations between CrawledItem and Item
             objs = [
@@ -86,8 +104,25 @@ class PaperRequestsTask(Task):
                 )
                 for item in data
             ]
-            db.add_all(objs)
-            db.commit()
+            for item in objs:
+                try:
+                    db.add(item)
+                    db.commit()
+                except Exception:
+                    db.rollback()
+                    logging.warning(f"Duplicate item: {item.title}")
+
+                    # update Item table if exists
+                    existing_item = db.exec(
+                        select(Item).where(Item.title == item.title),
+                    ).one()
+                    existing_item.category = item.category
+                    existing_item.url = item.url
+                    existing_item.abstract = item.abstract
+                    existing_item.authors = item.authors
+                    existing_item.last_updated = datetime.utcnow()
+                    db.add(existing_item)
+                    db.commit()
 
     @staticmethod
     def post_parse(data: PaperType) -> PaperType:
@@ -116,6 +151,7 @@ class RSSTask(Task):
     name: str
     url: str
     ignore_result: bool = True
+    rate_limit = "30/m"
 
     @property
     def db(self):
