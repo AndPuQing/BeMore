@@ -25,12 +25,13 @@ def _render_template(mjml_template: str) -> str:
     return mjml2html(template_str, disable_comments=True)
 
 
-def get_recommend_block(**keywords) -> str:
+def get_recommend_block(**kwargs) -> str:
     template_file = Path(settings.EMAIL_TEMPLATES_DIR) / "recommend_block.mjml"
     template_str = template_file.read_text()
     # replace keywords in template
-    for key, value in keywords.items():
-        template_str = template_str.replace(f"{{{ key }}}", value)
+    for key, value in kwargs.items():
+        if value:
+            template_str = template_str.replace("{{" + key + "}}", str(value))
     return template_str
 
 

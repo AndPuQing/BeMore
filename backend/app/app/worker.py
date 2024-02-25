@@ -519,23 +519,23 @@ def send_recommendation_email(self: RecommendTask, user_id: int) -> None:
             logger.error(f"User with id {user_id} not found.")
             return
         email = user.email
-        item_ids = recos[Columns.Item].values
+        item_ids = recos[Columns.Item].values.tolist()
         items = db.exec(select(Item).where(col(Item.id).in_(item_ids)))
 
-    mjml_template = Path(settings.EMAIL_TEMPLATES_DIR) / "recommendation.mjml"
-    mjml_template = mjml_template.read_text()
-    recommend_block = ""
-    for item, score in zip(items, recos["score"]):
-        recommend_block += get_recommend_block(
-            title=item.title,
-            abstract=item.abstract,
-            author=item.author,
-            score=score,
+        mjml_template = Path(settings.EMAIL_TEMPLATES_DIR) / "recommend.mjml"
+        mjml_template = mjml_template.read_text()
+        recommend_block = ""
+        for item, score in zip(items, recos["score"]):
+            recommend_block += get_recommend_block(
+                title=item.title,
+                abstract=item.abstract,
+                authors=item.authors,
+                score=score,
+            )
+        mjml_template = mjml_template.replace(r"{{content}}", recommend_block)
+        send_email(
+            email_to=email,
+            subject_template="Recommendation",
+            mjml_template=mjml_template,
         )
-    mjml_template = mjml_template.replace("{{content}}", recommend_block)
-    send_email(
-        email_to=email,
-        subject_template="Recommendation",
-        mjml_template=mjml_template,
-    )
-    logger.info(f"Recommendation email sent to {email}")
+        logger.info(f"Recommendation email sent to {email}")
