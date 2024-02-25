@@ -8,12 +8,17 @@ import gensim
 from celery import Task
 from celery.utils.log import get_task_logger
 from gensim.models.doc2vec import TaggedDocument
+from lightfm import LightFM
+from pandas import Series
+from rectools.dataset import Dataset
+from rectools.metrics import MAP, MeanInvUserFreq, Serendipity
+from rectools.models import LightFMWrapperModel
 from sqlmodel import Session, select
 
 from app import source
 from app.core.celery_app import celery_app
 from app.core.config import settings
-from app.models import CrawledItem, Item
+from app.models import CrawledItem, FeedBack, FeedBackType, Item, User
 from app.source.base import PaperRequestsTask
 
 logger = get_task_logger(__name__)
@@ -112,8 +117,7 @@ def train_doc2vec(self: DatabaseTask) -> None:
         )  # TODO: Do we need to limit the number of papers?
         documents = [paper.abstract for paper in papers]
 
-    DATA_SIZE = 100
-    documents = random.sample(documents, DATA_SIZE)
+    documents = random.sample(documents, settings.DATA_SIZE)
 
     def preprocess(docs, tokens_only=False):
         for i, doc in enumerate(docs):
@@ -166,6 +170,12 @@ def train_doc2vec(self: DatabaseTask) -> None:
     logger.info("Inferred vectors saved")
 
 
+def byte_to_list_float(byte: bytes):
+    import struct
+
+    return list(struct.unpack("f" * (len(byte) // 4), byte))
+
+
 @celery_app.task(
     acks_late=True,
     base=DatabaseTask,
@@ -173,6 +183,86 @@ def train_doc2vec(self: DatabaseTask) -> None:
     ignore_result=True,
 )
 def train_recommender(self: DatabaseTask) -> None:
+    from pandas import DataFrame
+
     # Step 1: Data Preprocessing
     with self.db as db:
+        feedbacks = db.exec(select(FeedBack))
+        feedbacks = [
+            (
+                feedback.user_id,
+                feedback.item_id,
+                feedback.feedback_type,
+                feedback.timestamp,
+            )
+            for feedback in feedbacks
+        ]
+        interactions_df = DataFrame(
+            feedbacks, columns=["user_id", "item_id", "weight", "datetime"]
+        )
+        # Feedback type to weight
+        interactions_df["weight"] = interactions_df["weight"].map(
+            {FeedBackType.positive: 1, FeedBackType.negative: -1}
+        )
+        # datetime to timestamp
+        interactions_df["datetime"] = interactions_df["datetime"].map(
+            lambda x: int(x.timestamp())
+        )
+
+    with self.db as db:
         papers = db.exec(select(Item))
+        documents = [(paper.id, paper.doc2vec) for paper in papers]
+        item_features_df = DataFrame(documents, columns=["id", "doc2vec"])
+        # Select only items that present in the feedbacks table
+        item_features_df = item_features_df[
+            item_features_df["id"].isin(interactions_df["item_id"].unique())
+        ]
+        item_features_df["doc2vec"] = item_features_df["doc2vec"].map(
+            byte_to_list_float
+        )
+        # unpack doc2vec
+        #        id  doc2vec
+        # 0  1  [0.1, 0.2, 0.3, 0.4, 0.5]
+        # to
+        #        id  doc2vec_0  doc2vec_1  doc2vec_2  doc2vec_3  doc2vec_4
+        # 0  1         0.1         0.2         0.3         0.4         0.5
+        item_features_df = item_features_df.join(
+            other=DataFrame(
+                item_features_df['doc2vec'].apply(Series).add_prefix('doc2vec_')
+            )
+        )
+        item_features_df = item_features_df.drop(columns=["doc2vec"])
+    with self.db as db:
+        users = db.exec(select(User))
+        user_features_df = DataFrame(
+            [(user.id) for user in users],
+            columns=["id"],
+        )
+
+    dataset = Dataset.construct(
+        interactions_df=interactions_df,
+        item_features_df=item_features_df,
+        make_dense_item_features=True,
+        # make_dense_user_features=True,
+    )
+
+    def make_base_model(factors: int):
+        return LightFMWrapperModel(LightFM(no_components=factors, loss="bpr"))
+
+    metrics_name = {
+        'MAP': MAP,
+        'MIUF': MeanInvUserFreq,
+        'Serendipity': Serendipity,
+    }
+    metrics = {}
+    for metric_name, metric in metrics_name.items():
+        for k in (1, 5, 10):
+            metrics[f'{metric_name}@{k}'] = metric(k=k)
+
+    fitted_models = {}
+
+    factors = list(range(64, 257, 64))
+    for n_factors in factors:
+        model = make_base_model(n_factors)
+        model.fit(dataset)
+        fitted_models[n_factors] = model
