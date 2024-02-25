@@ -16,8 +16,6 @@ dev-run:
 dev-stop:
   docker-compose -f docker-compose.dev.yml down
 
-dev-logs:
-  docker-compose -f docker-compose.dev.yml logs -f
 
 test: clean
   docker-compose -f docker-compose.ci.yml up -d --build
