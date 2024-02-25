@@ -36,17 +36,6 @@ services:
     ports:
       - "15672:15672"
 
-  flower:
-    container_name: bemore-flower
-    image: mher/flower
-    depends_on:
-      - queue
-    command: celery --broker=amqp://guest:guest@bemore-queue:5672// flower --broker_api=http://guest:guest@bemore-queue:15672/api/
-    ports:
-      - "5555:5555"
-    environment:
-      - FLOWER_UNAUTHENTICATED_API=true
-
   backend:
     tty: true
     container_name: bemore-backend
@@ -87,6 +76,27 @@ services:
       dockerfile: celeryworker.dockerfile
       args:
         INSTALL_DEV: ${INSTALL_DEV-true}
+
+  celerybeat:
+    tty: true
+    container_name: bemore-celerybeat
+    image: "${DOCKER_IMAGE_CELERYBEAT?Variable not set}:${TAG-latest}"
+    depends_on:
+      - db
+      - queue
+    env_file:
+      - .env
+    volumes:
+      - ./backend/app:/app
+    environment:
+      # Allow explicit env var override for tests
+      - SMTP_HOST=${SMTP_HOST?Variable not set}
+    build:
+      context: ./backend
+      dockerfile: celeryworker.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-true}
+    command: celery -A app.worker beat -l INFO
 
 volumes:
   app-db-data:

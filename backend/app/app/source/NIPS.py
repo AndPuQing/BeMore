@@ -7,11 +7,11 @@ class NIPS(PaperRequestsTask):
     url: str = "https://nips.cc/Conferences/2023/Schedule?type=Poster"
     name: str = "NIPS"
 
-    @staticmethod
-    def parse_urls(response: HtmlResponse) -> list[str]:
+    @classmethod
+    def parse_urls(cls, response: HtmlResponse) -> list[str]:
         poster_ids = response.css(".maincard::attr(id)").getall()
         urls = [
-            f"https://nips.cc/Conferences/2023/Schedule?showEvent={poster_id.replace('maincard_', '')}"
+            f"{cls.url}showEvent={poster_id.replace('maincard_', '')}"
             for poster_id in poster_ids
         ]
         return urls

@@ -1,0 +1,9 @@
+<mj-section>
+  <mj-column>
+    <mj-text font-weight="bold" font-size="24px" line-height="32px" color="#333333">{{title}}</mj-text>
+    <mj-text font-weight="bold" font-size="16px" line-height="24px" color="#666666">作者：{{authors}}</mj-text>
+    <mj-text font-size="16px" line-height="24px" color="#999999">摘要：{{abstract}}</mj-text>
+    <mj-text font-size="16px" line-height="24px" color="#999999">推荐指数：{{score}}/5.0</mj-text>
+    <mj-button font-size="16px" font-weight="bold" background-color="#0072C6" color="#FFFFFF" align="center" href="#">查看详情</mj-button>
+  </mj-column>
+</mj-section>

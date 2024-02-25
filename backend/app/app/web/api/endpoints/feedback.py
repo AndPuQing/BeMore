@@ -1,12 +1,25 @@
+from enum import Enum
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 
-from app.models import FeedBack, FeedBackType, Message
+from app.models import FeedBack, Message
 from app.web.api.deps import SessionDep, get_current_active_superuser
 
 router = APIRouter()
+
+
+class FeedBackType(Enum):
+    """
+    Feedback type.
+    """
+
+    LIKE = 1
+    DISLIKE = 0
+
+    def __eq__(self, __value: object) -> bool:
+        return self.value == __value
 
 
 @router.get(

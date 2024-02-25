@@ -8,15 +8,20 @@ from app.web.api.deps import get_db
 from app.web.application import get_app
 
 
-@pytest.fixture(name="session")
-def session_fixture():
+@pytest.fixture(scope="session")
+def engine_fixture():
     engine = create_engine(
-        f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@bemore-db/{settings.POSTGRES_DB}",
+        f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@bemore-db/test",
     )
     SQLModel.metadata.create_all(engine)
-
     with Session(engine) as session:
         init_db(session)
+    yield engine
+
+
+@pytest.fixture(name="session")
+def session_fixture(engine_fixture):
+    with Session(engine_fixture) as session:
         yield session
 
 

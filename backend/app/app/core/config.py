@@ -61,10 +61,12 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
 
-    EMAIL_TEMPLATES_DIR: str = "bemore/email-templates/build"
+    EMAIL_TEMPLATES_DIR: str = "/app/app/email-templates/"
 
     # requests settings
     REQUESTS_BATCH_SIZE: int = 2
+    CRAWL_INTERVAL: int = 60 * 60 * 24 * 7  # 1 week
+    DATA_SIZE: int = 100
 
     model_config = SettingsConfigDict(
         env_file=".env",
