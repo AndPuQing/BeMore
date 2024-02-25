@@ -84,7 +84,7 @@ class ActiveRecordMixin:
         update: Optional[dict] = None,
     ) -> SQLModel:
         if isinstance(source, SQLModel):
-            obj = cls.from_orm(source, update=update)  # type: ignore
+            obj = cls.model_validate(source, update=update)  # type: ignore
         elif isinstance(source, dict):
             obj = cls.parse_obj(source, update=update)  # type: ignore
         return obj
