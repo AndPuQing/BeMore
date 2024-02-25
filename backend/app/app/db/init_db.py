@@ -36,7 +36,6 @@ def init_db(session: Session) -> None:
                 is_active=False,
             )
             user = User.create(session, user_in)
-            logging.debug(f"User {user.email} created")  # type: ignore
 
         with open("/app/app/db/item.csv", "r") as file:
             reader = csv.reader(file)

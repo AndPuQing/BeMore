@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Union
 
 import gensim
+import numpy as np
 import pandas as pd
 from celery import Task
 from celery.utils.log import get_task_logger
@@ -17,7 +18,6 @@ from rectools import Columns
 from rectools.dataset import Dataset
 from rectools.metrics import MAP, MeanInvUserFreq, Serendipity, calc_metrics
 from rectools.models import ImplicitALSWrapperModel
-from sklearn.model_selection import train_test_split
 from sqlmodel import Session, col, select
 
 from app import source
@@ -191,6 +191,28 @@ def byte_to_list_float(byte: bytes):
     import struct
 
     return list(struct.unpack("f" * (len(byte) // 4), byte))
+
+
+def train_test_split(
+    df: DataFrame, test_size: float = 0.2, random_state: int = 32
+):
+    """
+    Split the dataset into train and test sets.
+
+    Args:
+        df (DataFrame): The dataset to split.
+        test_size (float): The size of the test set.
+        random_state (int): The random state for reproducibility.
+
+    Returns:
+        tuple: A tuple of train and test sets.
+    """
+    np.random.seed(random_state)
+    shuffled_indices = np.random.permutation(len(df))
+    test_set_size = int(len(df) * test_size)
+    test_indices = shuffled_indices[:test_set_size]
+    train_indices = shuffled_indices[test_set_size:]
+    return df.iloc[train_indices], df.iloc[test_indices]
 
 
 @celery_app.task(
