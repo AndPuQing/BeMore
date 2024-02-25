@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
+
 from typing import Optional, TypedDict
+
 
 import feedparser
 import requests
