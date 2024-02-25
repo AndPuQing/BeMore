@@ -1394,6 +1394,21 @@ files = [
 ]
 
 [[package]]
+name = "mjml-python"
+version = "1.3.0"
+description = "A Python wrapper for MRML (Rust port of MJML)."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mjml_python-1.3.0-cp37-abi3-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:7acafd604c4de62f63b847f9dfacd5517be01c04d62e4443e9d622a28af5b28e"},
+    {file = "mjml_python-1.3.0-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c943791cda2895258b1991cf16769b75279534d8b8a3b44353ae4c338ec36c8e"},
+    {file = "mjml_python-1.3.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4d923d77833e8b1f1db2197b22ac6bae7abcd9d68660b711765862f4ab4681b9"},
+    {file = "mjml_python-1.3.0-cp37-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:52f16128be27b462eefd3fd99dd2462fce977509ae43485bc8f8060d86511ff8"},
+    {file = "mjml_python-1.3.0-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:b53c35dde112c86223441d930cfb7ebdd18918f13237ea442867e777c5cb93f9"},
+    {file = "mjml_python-1.3.0-cp37-abi3-win_amd64.whl", hash = "sha256:5e5719992eeed2a3bc98a50a84b63ee5fd959f87d15a269a2c659e1febea9c98"},
+]
+
+[[package]]
 name = "multidict"
 version = "6.0.5"
 description = "multidict implementation"
@@ -3288,4 +3303,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "b78d7b7dc1399c6b5515dfa30007c1c9f14d0cb3687e040a2775c61a435d44fd"
+content-hash = "c33365f22cda06e914ab579dcdb20d71df3a025941f9b867989c2d13ccfa2f48"

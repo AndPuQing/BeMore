@@ -6,19 +6,44 @@ from typing import Any, Optional
 import emails
 from emails.template import JinjaTemplate
 from jose import jwt
+from mjml import mjml2html
 
 from app.core.config import settings
+
+
+def _render_template(mjml_template: str) -> str:
+    if "<mjml>" in mjml_template:
+        # template_name is a MJML template string
+        template_str = mjml_template
+    else:
+        # template_name is a file name
+        if not mjml_template.endswith(".mjml"):
+            mjml_template = f"{mjml_template}.mjml"
+
+        template_file = Path(settings.EMAIL_TEMPLATES_DIR) / mjml_template
+        template_str = template_file.read_text()
+    return mjml2html(template_str, disable_comments=True)
+
+
+def get_recommend_block(**keywords) -> str:
+    template_file = Path(settings.EMAIL_TEMPLATES_DIR) / "recommend_block.mjml"
+    template_str = template_file.read_text()
+    # replace keywords in template
+    for key, value in keywords.items():
+        template_str = template_str.replace(f"{{{ key }}}", value)
+    return template_str
 
 
 def send_email(
     email_to: str,
     subject_template: str = "",
-    html_template: str = "",
+    mjml_template: str = "",
     environment: dict[str, Any] = {},
 ) -> None:
     assert (
         settings.EMAILS_ENABLED
     ), "no provided configuration for email variables"
+    html_template = _render_template(mjml_template)
     message = emails.Message(
         subject=JinjaTemplate(subject_template),
         html=JinjaTemplate(html_template),
@@ -38,12 +63,10 @@ def send_email(
 def send_test_email(email_to: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Test email"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as f:
-        template_str = f.read()
     send_email(
         email_to=email_to,
         subject_template=subject,
-        html_template=template_str,
+        mjml_template="test_email",
         environment={"project_name": settings.PROJECT_NAME, "email": email_to},
     )
 
@@ -55,14 +78,12 @@ async def send_reset_password_email(
 ) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Password recovery for user {email}"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
-        template_str = f.read()
     server_host = settings.host + ":" + str(settings.port)
     link = f"{server_host}/reset-password?token={token}"
     send_email(
         email_to=email_to,
         subject_template=subject,
-        html_template=template_str,
+        mjml_template="reset_password",
         environment={
             "project_name": settings.PROJECT_NAME,
             "username": email,
@@ -76,13 +97,11 @@ async def send_reset_password_email(
 def send_new_account_email(email_to: str, username: str, password: str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - New account for user {username}"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html") as f:
-        template_str = f.read()
     link = settings.host + ":" + str(settings.port)
     send_email(
         email_to=email_to,
         subject_template=subject,
-        html_template=template_str,
+        mjml_template="new_account",
         environment={
             "project_name": settings.PROJECT_NAME,
             "username": username,
