@@ -1,15 +1,16 @@
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
 from app.models import Message
 from app.utils import send_test_email
-from app.web.api.deps import get_current_active_superuser
+from app.web.api.deps import CurrentUser, get_current_active_superuser
 from app.worker import (
     paper_crawler,
+    send_recommendation_email,
     train_doc2vec,
-    train_recommender_and_inference,
+    train_recommender,
 )
 
 router = APIRouter()
@@ -77,7 +78,23 @@ def test_recommender() -> TaskOut:
     """
     Test recommender.
     """
-    task = train_recommender_and_inference.delay()
+    task = train_recommender.delay()
+    return _to_task_out(task)
+
+
+@router.get(
+    "/test-send-recommender-email",
+    response_model=TaskOut,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def test_send_recommender_email(current_user: CurrentUser) -> TaskOut:
+    """
+    Test send recommender email.
+    """
+    user_id = current_user.id
+    if user_id is None:
+        raise HTTPException(status_code=400, detail="User id is None")
+    task = send_recommendation_email.s(user_id).delay()
     return _to_task_out(task)
 
 

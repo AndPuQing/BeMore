@@ -3,9 +3,11 @@ import inspect
 import os
 import random
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Union
 
 import gensim
+import pandas as pd
 from celery import Task
 from celery.utils.log import get_task_logger
 from gensim.models.doc2vec import TaggedDocument
@@ -16,13 +18,14 @@ from rectools.dataset import Dataset
 from rectools.metrics import MAP, MeanInvUserFreq, Serendipity, calc_metrics
 from rectools.models import ImplicitALSWrapperModel
 from sklearn.model_selection import train_test_split
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app import source
 from app.core.celery_app import celery_app
 from app.core.config import settings
-from app.models import CrawledItem, FeedBack, Item
+from app.models import CrawledItem, FeedBack, Item, User
 from app.source.base import PaperRequestsTask
+from app.utils import get_recommend_block, send_email
 
 os.environ["OPENBLAS_NUM_THREADS"] = "1"  # For implicit ALS
 logger = get_task_logger(__name__)
@@ -58,6 +61,7 @@ def batch(iterable: Union[set[str], list[str]], n: int = 1):
 
 
 class DatabaseTask(Task):
+
     @property
     def db(self) -> Session:
         """
@@ -175,6 +179,15 @@ def train_doc2vec(self: DatabaseTask) -> None:
 
 
 def byte_to_list_float(byte: bytes):
+    """
+    Converts a byte string to a list of floats.
+
+    Args:
+        byte (bytes): The byte string to convert.
+
+    Returns:
+        list: A list of floats converted from the byte string.
+    """
     import struct
 
     return list(struct.unpack("f" * (len(byte) // 4), byte))
@@ -186,7 +199,7 @@ def byte_to_list_float(byte: bytes):
     bind=True,
     ignore_result=True,
 )
-def train_recommender_and_inference(self: DatabaseTask) -> None:
+def train_recommender(self: DatabaseTask) -> None:
 
     # Step 1: Data Preprocessing
     with self.db as db:
@@ -281,7 +294,6 @@ def train_recommender_and_inference(self: DatabaseTask) -> None:
     }
 
     # Prepare dataset with biases as features
-
     item_biases = DataFrame({"id": catalog, "bias": 1})
     user_biases = DataFrame({"id": train[Columns.User].unique(), "bias": 1})
 
@@ -304,6 +316,7 @@ def train_recommender_and_inference(self: DatabaseTask) -> None:
         for k in (1, 5, 10):
             metrics[f'{metric_name}@{k}'] = metric(k=k)
 
+    # Step 2: Train the model on the no features dataset
     K_RECOS = 10
     NUM_THREADS = 32
     RANDOM_STATE = 32
@@ -377,6 +390,7 @@ def train_recommender_and_inference(self: DatabaseTask) -> None:
     # We have datasets with different feature selections
     feature_datasets.keys()
     features_results = []
+    fit_models = {}
     for dataset_name, dataset in feature_datasets.items():
         for n_factors in factors_options:
             for features_option in fit_features_together:
@@ -399,10 +413,129 @@ def train_recommender_and_inference(self: DatabaseTask) -> None:
                 )
                 metric_values["model"] = model_name  # type: ignore
                 features_results.append(metric_values)
+                fit_models[model_name] = (model, dataset)
 
     features_df = (
         DataFrame(features_results)
         .set_index("model")
         .sort_values(by=["MAP@10", "Serendipity@10"], ascending=False)
     )
-    print(features_df['MAP@10'])
+
+    with pd.option_context(
+        'expand_frame_repr', False, 'display.max_rows', None
+    ):
+        logger.info(features_df)
+
+    best_params = features_df.index[0]
+    best_model = fit_models[best_params]
+
+    # Step 3: Save the model
+    import pickle
+
+    with open("best_model.pkl", "wb") as f:
+        pickle.dump(best_model[0], f)
+
+    # Step 4: Save the best model dataset
+    with open("best_dataset.pkl", "wb") as f:
+        pickle.dump(best_model[1], f)
+
+
+class RecommendTask(Task):
+    _model = None
+    _dataset = None
+
+    @property
+    def model(self):
+        """
+        Lazy loading of the model.
+        """
+        if self._model is None:
+            import pickle
+
+            with open("best_model.pkl", "rb") as f:
+                self._model = pickle.load(f)
+        return self._model
+
+    @property
+    def dataset(self):
+        """
+        Lazy loading of the dataset.
+        """
+        if self._dataset is None:
+            import pickle
+
+            with open("best_dataset.pkl", "rb") as f:
+                self._dataset = pickle.load(f)
+        return self._dataset
+
+    def get_recommendations(self, users: list[int], k: int = 10):
+        """
+        Get recommendations for users.
+
+        Args:
+            users (list): A list of user ids.
+            k (int): The number of recommendations to return.
+
+        Returns:
+            dict: A dictionary of user ids and their recommendations.
+        """
+        recos = self.model.recommend(
+            users=users,
+            dataset=self.dataset,
+            k=k,
+            filter_viewed=True,
+        )
+        return recos
+
+    @property
+    def db(self) -> Session:
+        """
+        Lazy loading of database connection.
+        """
+        from app.db.engine import engine
+
+        return Session(engine)
+
+
+@celery_app.task(
+    acks_late=True,
+    base=RecommendTask,
+    bind=True,
+    ignore_result=True,
+)
+def send_recommendation_email(self: RecommendTask, user_id: int) -> None:
+    """
+    Celery task to send recommendation emails to users.
+
+    Args:
+        user_id (int): The user id.
+    """
+
+    recos: DataFrame = self.get_recommendations([user_id])
+
+    with self.db as db:
+        user = db.exec(select(User).where(User.id == user_id)).first()
+        if user is None:
+            logger.error(f"User with id {user_id} not found.")
+            return
+        email = user.email
+        item_ids = recos[Columns.Item].values
+        items = db.exec(select(Item).where(col(Item.id).in_(item_ids)))
+
+    mjml_template = Path(settings.EMAIL_TEMPLATES_DIR) / "recommendation.mjml"
+    mjml_template = mjml_template.read_text()
+    recommend_block = ""
+    for item, score in zip(items, recos["score"]):
+        recommend_block += get_recommend_block(
+            title=item.title,
+            abstract=item.abstract,
+            author=item.author,
+            score=score,
+        )
+    mjml_template = mjml_template.replace("{{content}}", recommend_block)
+    send_email(
+        email_to=email,
+        subject_template="Recommendation",
+        mjml_template=mjml_template,
+    )
+    logger.info(f"Recommendation email sent to {email}")
