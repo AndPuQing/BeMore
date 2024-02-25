@@ -1,5 +1,6 @@
 import collections
 import inspect
+import os
 import random
 from datetime import datetime, timedelta
 from typing import Union
@@ -8,19 +9,22 @@ import gensim
 from celery import Task
 from celery.utils.log import get_task_logger
 from gensim.models.doc2vec import TaggedDocument
-from lightfm import LightFM
-from pandas import Series
+from implicit.als import AlternatingLeastSquares
+from pandas import DataFrame, Series
+from rectools import Columns
 from rectools.dataset import Dataset
-from rectools.metrics import MAP, MeanInvUserFreq, Serendipity
-from rectools.models import LightFMWrapperModel
+from rectools.metrics import MAP, MeanInvUserFreq, Serendipity, calc_metrics
+from rectools.models import ImplicitALSWrapperModel
+from sklearn.model_selection import train_test_split
 from sqlmodel import Session, select
 
 from app import source
 from app.core.celery_app import celery_app
 from app.core.config import settings
-from app.models import CrawledItem, FeedBack, FeedBackType, Item, User
+from app.models import CrawledItem, FeedBack, Item
 from app.source.base import PaperRequestsTask
 
+os.environ["OPENBLAS_NUM_THREADS"] = "1"  # For implicit ALS
 logger = get_task_logger(__name__)
 
 
@@ -80,7 +84,7 @@ def paper_crawler(self: DatabaseTask) -> None:
             # duplicate urls
             urls = list(set(urls))
             # duplicate usls from db
-            with self.db as db:
+            with self.db as db:  # noqa: WPS440
                 crawled_urls = db.exec(
                     select(CrawledItem).where(
                         (CrawledItem.last_crawled - datetime.now())
@@ -182,8 +186,7 @@ def byte_to_list_float(byte: bytes):
     bind=True,
     ignore_result=True,
 )
-def train_recommender(self: DatabaseTask) -> None:
-    from pandas import DataFrame
+def train_recommender_and_inference(self: DatabaseTask) -> None:
 
     # Step 1: Data Preprocessing
     with self.db as db:
@@ -198,24 +201,30 @@ def train_recommender(self: DatabaseTask) -> None:
             for feedback in feedbacks
         ]
         interactions_df = DataFrame(
-            feedbacks, columns=["user_id", "item_id", "weight", "datetime"]
-        )
-        # Feedback type to weight
-        interactions_df["weight"] = interactions_df["weight"].map(
-            {FeedBackType.positive: 1, FeedBackType.negative: -1}
+            feedbacks,
+            columns=[
+                Columns.User,
+                Columns.Item,
+                Columns.Weight,
+                Columns.Datetime,
+            ],
         )
         # datetime to timestamp
-        interactions_df["datetime"] = interactions_df["datetime"].map(
-            lambda x: int(x.timestamp())
-        )
+        interactions_df[Columns.Datetime] = interactions_df[
+            Columns.Datetime
+        ].map(lambda x: int(x.timestamp()))
 
     with self.db as db:
         papers = db.exec(select(Item))
         documents = [(paper.id, paper.doc2vec) for paper in papers]
-        item_features_df = DataFrame(documents, columns=["id", "doc2vec"])
+        item_features_df = DataFrame(
+            documents, columns=[Columns.Item, "doc2vec"]
+        )
         # Select only items that present in the feedbacks table
         item_features_df = item_features_df[
-            item_features_df["id"].isin(interactions_df["item_id"].unique())
+            item_features_df[Columns.Item].isin(
+                interactions_df[Columns.Item].unique()
+            )
         ]
         item_features_df["doc2vec"] = item_features_df["doc2vec"].map(
             byte_to_list_float
@@ -230,24 +239,60 @@ def train_recommender(self: DatabaseTask) -> None:
             other=DataFrame(
                 item_features_df['doc2vec'].apply(Series).add_prefix('doc2vec_')
             )
-        )
-        item_features_df = item_features_df.drop(columns=["doc2vec"])
-    with self.db as db:
-        users = db.exec(select(User))
-        user_features_df = DataFrame(
-            [(user.id) for user in users],
-            columns=["id"],
-        )
+        ).drop(columns=["doc2vec"])
 
-    dataset = Dataset.construct(
+    # TODO(PuQing): drop the cold feedbacks
+    train, test = train_test_split(
+        interactions_df, test_size=0.2, random_state=32
+    )
+    test_users = test[Columns.User].unique()
+    catalog = train[Columns.Item].unique()
+
+    item_features_df = item_features_df[
+        item_features_df[Columns.Item].isin(catalog)
+    ]
+
+    dataset_no_features = Dataset.construct(
         interactions_df=interactions_df,
-        item_features_df=item_features_df,
-        make_dense_item_features=True,
-        # make_dense_user_features=True,
     )
 
-    def make_base_model(factors: int):
-        return LightFMWrapperModel(LightFM(no_components=factors, loss="bpr"))
+    dataset_full_features = Dataset.construct(
+        interactions_df=train,
+        # user_features_df=user_features,
+        # cat_user_features=["sex", "age", "income"],
+        item_features_df=item_features_df,
+        make_dense_item_features=True,
+    )
+
+    dataset_item_features = Dataset.construct(
+        interactions_df=train,
+        item_features_df=item_features_df,
+        make_dense_item_features=True,
+    )
+
+    dataset_user_features = Dataset.construct(
+        interactions_df=train,
+    )
+
+    feature_datasets = {
+        "full_features": dataset_full_features,
+        "item_features": dataset_item_features,
+        "user_features": dataset_user_features,
+    }
+
+    # Prepare dataset with biases as features
+
+    item_biases = DataFrame({"id": catalog, "bias": 1})
+    user_biases = DataFrame({"id": train[Columns.User].unique(), "bias": 1})
+
+    dataset_with_biases = Dataset.construct(
+        interactions_df=train,
+        user_features_df=user_biases,
+        make_dense_user_features=True,
+        item_features_df=item_biases,
+        make_dense_item_features=True,
+    )
+    feature_datasets["biases"] = dataset_with_biases
 
     metrics_name = {
         'MAP': MAP,
@@ -259,10 +304,105 @@ def train_recommender(self: DatabaseTask) -> None:
         for k in (1, 5, 10):
             metrics[f'{metric_name}@{k}'] = metric(k=k)
 
-    fitted_models = {}
+    K_RECOS = 10
+    NUM_THREADS = 32
+    RANDOM_STATE = 32
+    ITERATIONS = 10
 
-    factors = list(range(64, 257, 64))
-    for n_factors in factors:
-        model = make_base_model(n_factors)
-        model.fit(dataset)
-        fitted_models[n_factors] = model
+    def make_base_model(
+        factors: int,
+        regularization: float,
+        alpha: float,
+        fit_features_together: bool = False,
+    ):
+        return ImplicitALSWrapperModel(
+            AlternatingLeastSquares(
+                factors=factors,
+                regularization=regularization,
+                alpha=alpha,
+                random_state=RANDOM_STATE,
+                use_gpu=False,
+                num_threads=NUM_THREADS,
+                iterations=ITERATIONS,
+            ),
+            fit_features_together=fit_features_together,
+        )
+
+    alphas = [1, 10, 100]
+    regularizations = [0.01, 0.1, 0.5]
+    factors = [32, 64, 128]
+    results = []
+    dataset = dataset_no_features
+
+    for alpha in alphas:
+        for regularization in regularizations:
+            for n_factors in factors:
+                model_name = f"no_features_factors_{n_factors}_alpha_{alpha}_reg_{regularization}"
+                model = make_base_model(
+                    factors=n_factors,
+                    regularization=regularization,
+                    alpha=alpha,
+                )
+                model.fit(dataset)
+                recos = model.recommend(
+                    users=test_users,
+                    dataset=dataset,
+                    k=K_RECOS,
+                    filter_viewed=True,
+                )
+
+                metric_values = calc_metrics(
+                    metrics, recos, test, train, catalog
+                )
+                metric_values["model"] = model_name  # type: ignore
+                results.append(metric_values)
+
+    pure_df = (
+        DataFrame(results)
+        .set_index("model")
+        .sort_values(by=["MAP@10", "Serendipity@10"], ascending=False)
+    )
+
+    # Best params for MAP@10
+    best_params = pure_df.index[0]
+
+    # Best grid search params for pure iALS models
+    factors_options = (32, 64, 128)
+    ALPHA = float(best_params.split("_")[5])
+    REG = float(best_params.split("_")[7])
+
+    # We have two options for training iALS with features in RecTools
+    fit_features_together = (True, False)
+
+    # We have datasets with different feature selections
+    feature_datasets.keys()
+    features_results = []
+    for dataset_name, dataset in feature_datasets.items():
+        for n_factors in factors_options:
+            for features_option in fit_features_together:
+                model_name = f"{dataset_name}_factors_{n_factors}_fit_together_{features_option}"
+                model = make_base_model(
+                    factors=n_factors,
+                    regularization=REG,
+                    alpha=ALPHA,
+                    fit_features_together=features_option,
+                )
+                model.fit(dataset)
+                recos = model.recommend(
+                    users=test_users,
+                    dataset=dataset,
+                    k=K_RECOS,
+                    filter_viewed=True,
+                )
+                metric_values = calc_metrics(
+                    metrics, recos, test, train, catalog
+                )
+                metric_values["model"] = model_name  # type: ignore
+                features_results.append(metric_values)
+
+    features_df = (
+        DataFrame(features_results)
+        .set_index("model")
+        .sort_values(by=["MAP@10", "Serendipity@10"], ascending=False)
+    )
+    print(features_df['MAP@10'])

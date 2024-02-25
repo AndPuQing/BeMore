@@ -6,7 +6,11 @@ from pydantic.networks import EmailStr
 from app.models import Message
 from app.utils import send_test_email
 from app.web.api.deps import get_current_active_superuser
-from app.worker import paper_crawler, train_doc2vec, train_recommender
+from app.worker import (
+    paper_crawler,
+    train_doc2vec,
+    train_recommender_and_inference,
+)
 
 router = APIRouter()
 
@@ -73,7 +77,7 @@ def test_recommender() -> TaskOut:
     """
     Test recommender.
     """
-    task = train_recommender.delay()
+    task = train_recommender_and_inference.delay()
     return _to_task_out(task)
 
 

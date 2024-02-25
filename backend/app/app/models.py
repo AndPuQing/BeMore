@@ -1,10 +1,8 @@
-import enum
 import logging
 from datetime import datetime
 from typing import Any, Optional, Union
 
 from pydantic import EmailStr, HttpUrl
-from sqlalchemy import Enum
 from sqlalchemy.exc import IntegrityError, NoResultFound, OperationalError
 from sqlalchemy.orm.exc import FlushError
 from sqlmodel import (
@@ -312,18 +310,12 @@ class CrawledItem(SQLModel, table=True):
     )
 
 
-class FeedBackType(enum.Enum):
-    positive = "positive"
-    negative = "negative"
-
-
 class FeedBack(SQLModel, ActiveRecordMixin, table=True):
     id: int = Field(default=None, primary_key=True)
-    feedback_type: FeedBackType = Field(
-        nullable=False, sa_type=Enum(FeedBackType)
-    )
-    item_id: int = Field(default=None, foreign_key="item.id", nullable=False)
-    user_id: int = Field(default=None, foreign_key="user.id", nullable=False)
+    # 0: dislike, 1: like
+    feedback_type: float
+    item_id: int = Field(default=None, foreign_key="item.id")
+    user_id: int = Field(default=None, foreign_key="user.id")
     timestamp: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
