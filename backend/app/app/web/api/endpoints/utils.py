@@ -1,11 +1,18 @@
+from typing import Any
+
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from pydantic.networks import EmailStr
 
-from app.models import Message
+from app.models import FeedBack, Message
 from app.utils import send_test_email
-from app.web.api.deps import CurrentUser, get_current_active_superuser
+from app.web.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
+)
 from app.worker import (
     paper_crawler,
     send_recommendation_email,
@@ -94,7 +101,7 @@ def test_send_recommender_email(current_user: CurrentUser) -> TaskOut:
     user_id = current_user.id
     if user_id is None:
         raise HTTPException(status_code=400, detail="User id is None")
-    task = send_recommendation_email.s(user_id).delay()
+    task = send_recommendation_email.s([user_id]).delay()
     return _to_task_out(task)
 
 
@@ -102,4 +109,33 @@ def _to_task_out(r: AsyncResult) -> TaskOut:
     return TaskOut(
         task_id=r.task_id,  # type: ignore
         status=r.status,
+    )
+
+
+@router.get("/feedback/{user_id}/{item_id}", status_code=200)
+def add_feedback(session: SessionDep, user_id: int, item_id: int) -> Any:
+    """
+    Create an item.
+    """
+    session.add(
+        FeedBack(
+            user_id=user_id,
+            item_id=item_id,
+            feedback_type=1,
+        ),
+    )
+    session.commit()
+    # # back to the previous page
+    return HTMLResponse(
+        """
+        <html>
+        <body>
+            <script>
+                window.onload = function() {
+                    window.close();
+                };
+            </script>
+        </body>
+        </html>
+        """
     )

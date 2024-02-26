@@ -10,6 +10,7 @@ import gensim
 import numpy as np
 import pandas as pd
 from celery import Task
+from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from gensim.models.doc2vec import TaggedDocument
 from implicit.als import AlternatingLeastSquares
@@ -33,12 +34,22 @@ logger = get_task_logger(__name__)
 
 @celery_app.on_after_configure.connect  # type: ignore
 def setup_periodic_tasks(sender, **kwargs):
-    # sender.add_periodic_task(
-    #     crontab(minute="10"),
-    #     paper_crawler.s(),
-    #     name="crawl papers",
-    # )
-    pass
+    sender.add_periodic_task(
+        crontab(minute='0', hour='*/6'),
+        paper_crawler.s(),
+        name="crawl papers",
+    )
+    sender.add_periodic_task(
+        crontab(minute='0', hour='*/2'),
+        train_doc2vec.s() | train_recommender.s(),
+        name="train models",
+    )
+
+    sender.add_periodic_task(
+        crontab(minute='0', hour='*/1'),
+        send_recommendation_email.s([1]),
+        name="send recommendation emails",
+    )
 
 
 members = inspect.getmembers(source, inspect.isclass)
@@ -525,7 +536,7 @@ class RecommendTask(Task):
     bind=True,
     ignore_result=True,
 )
-def send_recommendation_email(self: RecommendTask, user_id: int) -> None:
+def send_recommendation_email(self: RecommendTask, user_ids: list[int]) -> None:
     """
     Celery task to send recommendation emails to users.
 
@@ -533,31 +544,40 @@ def send_recommendation_email(self: RecommendTask, user_id: int) -> None:
         user_id (int): The user id.
     """
 
-    recos: DataFrame = self.get_recommendations([user_id])
+    recos: DataFrame = self.get_recommendations(user_ids)
 
-    with self.db as db:
-        user = db.exec(select(User).where(User.id == user_id)).first()
-        if user is None:
-            logger.error(f"User with id {user_id} not found.")
-            return
-        email = user.email
-        item_ids = recos[Columns.Item].values.tolist()
-        items = db.exec(select(Item).where(col(Item.id).in_(item_ids)))
+    for user_id in user_ids:
+        with self.db as db:
+            user = db.exec(select(User).where(User.id == user_id)).first()
+            if user is None:
+                logger.error(f"User with id {user_id} not found.")
+                return
+            email = user.email
+            item_ids = recos[recos[Columns.User] == user_id][
+                Columns.Item
+            ].values.tolist()
+            items = db.exec(select(Item).where(col(Item.id).in_(item_ids)))
 
-        mjml_template = Path(settings.EMAIL_TEMPLATES_DIR) / "recommend.mjml"
-        mjml_template = mjml_template.read_text()
-        recommend_block = ""
-        for item, score in zip(items, recos["score"]):
-            recommend_block += get_recommend_block(
-                title=item.title,
-                abstract=item.abstract,
-                authors=item.authors,
-                score=score,
+            mjml_template = (
+                Path(settings.EMAIL_TEMPLATES_DIR) / "recommend.mjml"
             )
-        mjml_template = mjml_template.replace(r"{{content}}", recommend_block)
-        send_email(
-            email_to=email,
-            subject_template="Recommendation",
-            mjml_template=mjml_template,
-        )
-        logger.info(f"Recommendation email sent to {email}")
+            mjml_template = mjml_template.read_text()
+            recommend_block = ""
+            for item, score in zip(items, recos["score"]):
+                recommend_block += get_recommend_block(
+                    title=item.title,
+                    abstract=item.abstract,
+                    authors=item.authors,
+                    score=score,
+                    user_id=user_id,
+                    item_id=item.id,
+                )
+            mjml_template = mjml_template.replace(
+                r"{{content}}", recommend_block
+            )
+            send_email(
+                email_to=email,
+                subject_template="Recommendation",
+                mjml_template=mjml_template,
+            )
+            logger.info(f"Recommendation email sent to {email}")
