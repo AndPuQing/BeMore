@@ -5,4 +5,4 @@ from app.source.ICML import ICML
 from app.source.NIPS import NIPS
 from app.source.PMLR import PMLR
 
-__all__ = ["NIPS", "ICLR", "ICML", "Arxiv", "AAAI", "PMLR"]
+__all__ = ["Arxiv", "AAAI", "ICLR", "ICML", "NIPS", "PMLR"]

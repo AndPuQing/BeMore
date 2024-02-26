@@ -34,7 +34,7 @@ class PaperRequestsTask(Task):
     url: str
     ignore_result: bool = True
     name: str
-    rate_limit = "30/m"
+    rate_limit = "10/m"
 
     @property
     def db(self):
@@ -151,7 +151,6 @@ class RSSTask(Task):
     name: str
     url: str
     ignore_result: bool = True
-    rate_limit = "30/m"
 
     @property
     def db(self):

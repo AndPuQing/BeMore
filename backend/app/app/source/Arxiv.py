@@ -1,9 +1,6 @@
-import re
 from typing import Any
 
-from scrapy.http import HtmlResponse
-
-from app.source.base import PaperType, RSSTask
+from app.source.base import RSSTask
 
 CATEGORY_MAP = {
     "cs.AI": "Artificial Intelligence",
@@ -43,23 +40,7 @@ class Arxiv(RSSTask):
     def parse(entry: dict) -> dict[str, Any]:
         return {
             "title": entry["title"],
-            "authors": entry["author"],
+            "authors": entry["authors"]["name"].split(", "),
             "url": entry["link"],
             "abstract": entry["summary"],
         }
-
-    def post_parse(self, entry: PaperType) -> PaperType:
-        category = re.findall(r"\[(.*?)\]", entry["title"])[0]
-        entry["title"] = entry["title"].split("(", 1)[0]
-        entry["authors"] = (
-            HtmlResponse(url="", body=entry["authors"], encoding="utf-8")
-            .css("a::text")
-            .getall()
-        )
-        entry["abstract"] = (
-            HtmlResponse(url="", body=entry["abstract"], encoding="utf-8")
-            .css("p::text")
-            .get()
-        )
-        entry["category"] = category
-        return entry

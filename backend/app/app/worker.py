@@ -31,25 +31,25 @@ from app.utils import get_recommend_block, send_email
 os.environ["OPENBLAS_NUM_THREADS"] = "1"  # For implicit ALS
 logger = get_task_logger(__name__)
 
-
-@celery_app.on_after_configure.connect  # type: ignore
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        crontab(minute='0', hour='*/6'),
-        paper_crawler.s(),
-        name="crawl papers",
-    )
-    sender.add_periodic_task(
-        crontab(minute='0', hour='*/2'),
-        train_doc2vec.s() | train_recommender.s(),
-        name="train models",
-    )
-
-    sender.add_periodic_task(
-        crontab(minute='0', hour='*/1'),
-        send_recommendation_email.s([1]),
-        name="send recommendation emails",
-    )
+celery_app.conf.beat_schedule = {
+    "crawl papers": {
+        "task": "app.worker.paper_crawler",
+        "schedule": crontab(minute="0", hour="*/12"),
+    },
+    "train doc2vec": {
+        "task": "app.worker.train_doc2vec",
+        "schedule": crontab(minute="0", hour="*/2"),
+    },
+    "train recommender": {
+        "task": "app.worker.train_recommender",
+        "schedule": crontab(minute="0", hour="*/4"),
+    },
+    "send recommendation emails": {
+        "task": "app.worker.send_recommendation_email",
+        "schedule": crontab(minute="0", hour="*/4"),
+        'args': [[1]],
+    },
+}
 
 
 members = inspect.getmembers(source, inspect.isclass)

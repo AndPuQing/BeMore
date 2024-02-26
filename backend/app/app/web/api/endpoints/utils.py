@@ -113,18 +113,21 @@ def _to_task_out(r: AsyncResult) -> TaskOut:
 
 
 @router.get("/feedback/{user_id}/{item_id}", status_code=200)
-def add_feedback(session: SessionDep, user_id: int, item_id: int) -> Any:
+def add_feedback(
+    session: SessionDep, user_id: int, item_id: int, like: bool = True
+) -> Any:
     """
     Create an item.
     """
-    session.add(
-        FeedBack(
-            user_id=user_id,
-            item_id=item_id,
-            feedback_type=1,
-        ),
-    )
-    session.commit()
+    if like:
+        session.add(
+            FeedBack(
+                user_id=user_id,
+                item_id=item_id,
+                feedback_type=5,
+            ),
+        )
+        session.commit()
     # # back to the previous page
     return HTMLResponse(
         """

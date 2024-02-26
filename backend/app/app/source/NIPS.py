@@ -10,8 +10,9 @@ class NIPS(PaperRequestsTask):
     @classmethod
     def parse_urls(cls, response: HtmlResponse) -> list[str]:
         poster_ids = response.css(".maincard::attr(id)").getall()
+        base_url = cls.url.replace("type=Poster", "")
         urls = [
-            f"{cls.url}showEvent={poster_id.replace('maincard_', '')}"
+            f"{base_url}showEvent={poster_id.replace('maincard_', '')}"
             for poster_id in poster_ids
         ]
         return urls
