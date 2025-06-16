@@ -9,7 +9,7 @@ maintainers = []
 python = ">=3.13,<3.14"
 fastapi = "^0.115.0"
 uvicorn = { version = "^0.34.0", extras = ["standard"] }
-gunicorn = "^21.2.0"
+gunicorn = "^23.0.0"
 pydantic = { extras = ["email"], version = "^2.5.3" }
 pydantic-settings = "^2"
 yarl = "^1.9.2"
