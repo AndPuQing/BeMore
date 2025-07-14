@@ -24,13 +24,13 @@ repos:
         files: (.*\.(py|pyi))$
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
+    rev: 7.3.0
     hooks:
       - id: flake8
         args: [--config=.flake8]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.12
+    rev: v0.12.3
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --no-cache]
