@@ -7,7 +7,7 @@ maintainers = []
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
-fastapi = "^0.115.0"
+fastapi = "^0.116.0"
 uvicorn = { version = "^0.35.0", extras = ["standard"] }
 gunicorn = "^21.2.0"
 pydantic = { extras = ["email"], version = "^2.5.3" }
