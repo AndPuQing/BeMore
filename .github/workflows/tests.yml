@@ -35,7 +35,7 @@ jobs:
         with:
           key: docker-${{ hashFiles('docker-compose.ci.yml') }}
       - run: just test
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
